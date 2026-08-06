@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TENDIE CHOMP — Power to the Players</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#FD0000; --gold:#ffb300; --green:#00c853; --head:"Oswald","Arial Black",sans-serif; --mono:"Roboto Mono",Consolas,monospace;}
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:#0a0a0a; color:#fff; font-family:var(--mono); min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;}
+  .topbar{width:100%; display:flex; align-items:center; justify-content:space-between;
+    background:linear-gradient(180deg,#161616,#000 65%); border-bottom:4px solid var(--red);
+    box-shadow:0 4px 18px rgba(0,0,0,.45); margin-bottom:14px;}
+  .logo{display:flex; align-items:center; font-family:var(--head); font-weight:700; font-size:1.4rem;
+    letter-spacing:.5px; text-transform:uppercase; flex:0 0 auto; white-space:nowrap;
+    position:relative; overflow:hidden;}
+  .logo .blk{color:#fff; padding:12px 8px 12px 22px;}
+  .logo .red{background:var(--red); color:#fff; padding:12px 14px; margin-left:4px;}
+  .logo::after{content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(115deg, transparent 32%, color-mix(in srgb, var(--gold) 38%, transparent) 50%, transparent 68%);
+    transform:translateX(-130%); animation:sheen 6s ease-in-out infinite;}
+  @keyframes sheen{0%,74%{transform:translateX(-130%);} 90%,100%{transform:translateX(130%);}}
+  .tag{padding-right:22px; font-family:var(--head); letter-spacing:3px; font-size:.75rem;
+    text-transform:uppercase; display:flex; align-items:center; gap:14px;}
+  .tag b{color:var(--red); margin-right:6px;}
+  #exitBtn{font:inherit; font-size:.7rem; letter-spacing:1.5px; cursor:pointer; color:#fff;
+    background:linear-gradient(180deg,#1c1c1c,#000); border:1px solid #444; border-radius:10px;
+    padding:7px 13px; transition:border-color .2s ease, background .2s ease, box-shadow .2s ease;}
+  #exitBtn:hover{border-color:var(--red); background:linear-gradient(180deg,#2a0000,#120000);
+    box-shadow:0 0 16px color-mix(in srgb, var(--red) 45%, transparent);}
+  @property --spin{syntax:"<angle>"; inherits:false; initial-value:0deg;}
+  .frame{position:relative; border-radius:18px; padding:10px; background:#000;
+    box-shadow:0 12px 40px rgba(0,0,0,.6);}
+  .frame::before{content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:conic-gradient(from var(--spin), var(--red), var(--gold) 25%, transparent 55%, var(--red));
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite:exclude; animation:spinb 9s linear infinite; opacity:.6; pointer-events:none;}
+  @keyframes spinb{to{--spin:360deg;}}
+  .crt{position:relative; border-radius:12px; overflow:hidden;}
+  .crt::after{content:""; position:absolute; inset:0; pointer-events:none; z-index:2;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px);}
+  canvas{display:block; background:#04040a; border-radius:12px;}
+  .hint{color:#9aa0a6; font-size:.72rem; margin:10px 0 20px; text-align:center; letter-spacing:.5px;}
+  .hint b{color:#fff;}
+  @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo"><span class="blk">GameStop</span><span class="red">Tendie Chomp</span></div>
+  <div class="tag"><b>■</b> Power to the Players
+    <button id="exitBtn" title="Back to the calculator (Esc)">✕ EXIT TO CALCULATOR</button>
+  </div>
+</div>
+<div class="frame"><div class="crt"><canvas id="cv" width="532" height="700"></canvas></div></div>
+<div class="hint"><b>←→↑↓ / WASD</b> move · <b>Q</b> 🚀 yolo fuel · <b>E</b> ❄️ margin call · <b>G</b> ai debug<br>
+<b>P</b> pause · <b>M</b> mute · <b>ENTER</b> start · <b>ESC</b> exit</div>
+<script>
+"use strict";
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+const TAU=Math.PI*2, rnd=(a,b)=>a+Math.random()*(b-a);
+
+/* ================= maze ================= */
+const MAZE=[
+"###################",
+"#........#........#",
+"#o##.###.#.###.##o#",
+"#.................#",
+"#.##.#.#####.#.##.#",
+"#....#...#...#....#",
+"####.###.#.###.####",
+"####.#.......#.####",
+"####.#.##-##.#.####",
+"T......#GGG#......T",
+"####.#.#####.#.####",
+"####.#.......#.####",
+"####.#.#####.#.####",
+"#........#........#",
+"#.##.###.#.###.##.#",
+"#o.#.....P.....#.o#",
+"##.#.#.#####.#.#.##",
+"#....#...#...#....#",
+"#.######.#.######.#",
+"#.................#",
+"###################"];
+const COLS=MAZE[0].length, ROWS=MAZE.length, T=28;
+const OX=Math.round((cv.width-COLS*T)/2), OY=64;
+let grid=[], pelletsLeft=0, startPos={c:9,r:15}, housePos=[];
+function loadMaze(){
+  grid=[]; pelletsLeft=0; housePos=[];
+  for(let r=0;r<ROWS;r++){
+    grid[r]=[];
+    for(let c=0;c<COLS;c++){
+      const ch=MAZE[r][c];
+      if(ch==="P"){ startPos={c,r}; grid[r][c]="."; pelletsLeft++; }
+      else if(ch==="G"){ housePos.push({c,r}); grid[r][c]=" "; }
+      else if(ch==="."||ch==="o"){ grid[r][c]=ch; pelletsLeft++; }
+      else grid[r][c]=ch;
+    }
+  }
+}
+const isWall=(c,r)=>{ if(r<0||r>=ROWS) return true;
+  c=(c+COLS)%COLS; const g=grid[r][c]; return g==="#"; };
+const isDoor=(c,r)=>r>=0&&r<ROWS&&grid[r][(c+COLS)%COLS]==="-";
+const tileX=c=>OX+c*T+T/2, tileY=r=>OY+r*T+T/2;
+
+/* ================= sound ================= */
+let audioOn=true, AC=null;
+function ac(){ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); return AC; }
+function tone(f,dur,type="square",vol=0.04,delay=0,slide=0){
+  if(!audioOn) return;
+  try{ const c=ac(), o=c.createOscillator(), g=c.createGain(), t=c.currentTime+delay;
+    o.type=type; o.frequency.setValueAtTime(f,t);
+    if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(slide,1),t+dur);
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur+0.02);
+  }catch(_){}}
+const SFX={
+  chomp(){ tone(couldChomp?520:420,0.045,"square",0.03); couldChomp=!couldChomp; },
+  power(){ [262,330,392,523,659,784].forEach((f,i)=>tone(f,0.08,"square",0.045,i*0.05)); },
+  squeeze(){ [392,523,659,880].forEach((f,i)=>tone(f,0.09,"square",0.05,i*0.06));
+             tone(1200,0.25,"square",0.03,0.26); },
+  bonus(){ tone(988,0.07,"square",0.05); tone(1319,0.2,"square",0.05,0.07); },
+  die(){ [440,392,330,262,196,147].forEach((f,i)=>tone(f,0.16,"triangle",0.055,i*0.13)); },
+  levelclear(){ [392,392,523,659,784,1047].forEach((f,i)=>tone(f,i===5?0.5:0.12,"square",0.05,i*0.13)); },
+  extra(){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,0.1,"square",0.045,i*0.07)); },
+  cameo(){ [659,784,988,1319,1568].forEach((f,i)=>tone(f,0.1,"square",0.05,i*0.08)); },
+  fud(){ tone(220,0.4,"sawtooth",0.045,0,90); tone(160,0.5,"sawtooth",0.035,0.1,70); },
+  pickup(){ tone(784,0.06,"square",0.04); tone(1047,0.12,"square",0.04,0.06); },
+  rocket(){ tone(180,0.55,"sawtooth",0.05,0,1400);                    // whoosh up
+            [523,659,784,1047,1319].forEach((f,i)=>tone(f,0.09,"square",0.04,i*0.05));
+            tone(90,0.6,"triangle",0.04,0.05); },
+  freeze(){ [1568,1319,1047,880,740].forEach((f,i)=>tone(f,0.14,"sine",0.045,i*0.07)); // icy descent
+            for(let i=0;i<7;i++) tone(rnd(1800,2600),0.05,"square",0.014,0.3+i*0.045); }, // crackle
+  shield(){ [659,880,1319].forEach((f,i)=>tone(f,0.16,"sine",0.045,i*0.08)); },
+  rally(){ [392,440,494,523,587].forEach((f,i)=>tone(f,0.08,"square",0.035,i*0.045)); },
+  thaw(){ [740,880,1047].forEach((f,i)=>tone(f,0.1,"sine",0.03,i*0.06)); },
+};
+let couldChomp=true;
+/* original chiptune maze loop — a bass walk under a nervous arpeggio */
+const BASS=[98,98,131,98,110,110,147,110];
+const ARP =[392,494,587,494,440,523,659,523];
+let musicStep=0, musicTimer=null;
+function musicTick(){
+  if(state!=="play"||!audioOn) return;
+  const fast=fright>0;
+  const i=musicStep%8;
+  tone(BASS[i]*(fast?1.5:1),0.1,"triangle",0.035);
+  if(fast||i%2===0) tone(ARP[i]*(fast?1.5:1),0.07,"square",0.022);
+  if(rocketT>0) tone(ARP[(i+2)%8]*2,0.05,"square",0.014);   // afterburner shimmer
+  musicStep++;
+}
+function startMusic(){ stopMusic();
+  musicTimer=setInterval(musicTick, rocketT>0?95 : fright>0?110 : 150); }
+function stopMusic(){ if(musicTimer){ clearInterval(musicTimer); musicTimer=null; } }
+
+/* ================= state ================= */
+const LEVEL_NAMES=["JANUARY SQUEEZE","THE DIP","REDDIT RALLY","GAMMA RAMP","MOON MISSION"];
+let state="menu", score=0, lives=3, level=1, hi=0, hiName="";
+try{ const s=JSON.parse(localStorage.getItem("gmeTendieHi")||"{}"); hi=s.score||0; hiName=s.name||""; }catch(_){}
+let player, ghosts, bonus=null, bonusT=0, fright=0, frightChain=0, squeezedThisPower=0;
+let modeT=0, modeIdx=0, frame=0, readyT=0, dyingT=0, clearT=0, msg=null, msgT=0;
+let mult=1, streak=0, fud=0, fudCool=900, cameo=null, cameoCool=1800, extraAt=25000, showAI=false;
+
+/* ================= usable items =================
+   rocket + freeze are HELD (slots Q / E, fire when you choose).
+   banana, diamond, megaphone fire the instant you touch them.        */
+const ITEMS={
+  rocket:   {icon:"🚀", name:"YOLO FUEL",    hold:true,  dur:7*60,  weight:34, col:"#ffb300",
+             cry:"🚀 TO THE MOON — LFG!"},
+  freeze:   {icon:"❄️", name:"MARGIN CALL",  hold:true,  dur:6*60,  weight:8,  col:"#7fe7ff",
+             cry:"❄️ MARGIN CALL — THEY'RE NOT LIQUID!"},
+  diamond:  {icon:"💎", name:"DIAMOND SHIELD",hold:false, dur:10*60, weight:16, col:"#7fe7ff",
+             cry:"💎 DIAMOND SHIELD UP"},
+  banana:   {icon:"🍌", name:"TENDIE BOMB",  hold:false, dur:4*60,  weight:22, col:"#ffe066",
+             cry:"🍌 TENDIE BOMB — THEY'RE TURNED AROUND"},
+  megaphone:{icon:"📣", name:"REDDIT RALLY", hold:false, dur:5*60,  weight:20, col:"#ff8ad8",
+             cry:"📣 REDDIT RALLY — SHARES INCOMING"},
+};
+const ROCKET_MULT=1.7;
+let drops=[];            // items lying in the maze
+let slots={rocket:0, freeze:0};   // how many of each you're holding (max 1)
+let rocketT=0, rocketInv=0, freezeT=0, thawT=0, shieldT=0, bananaT=0, magnetT=0;
+let dropCounter=0, flyers=[], trail=[];
+function resetItems(){
+  drops=[]; slots={rocket:0,freeze:0};
+  rocketT=rocketInv=freezeT=thawT=shieldT=bananaT=magnetT=0;
+  dropCounter=0; flyers=[]; trail=[];
+}
+function pickItemKind(){
+  // never leave two of the same held item lying around / stacked
+  const pool=Object.entries(ITEMS).filter(([k,v])=>{
+    if(!v.hold) return true;
+    if(slots[k]>0) return false;
+    return !drops.some(d=>d.kind===k);
+  });
+  const total=pool.reduce((s,[,v])=>s+v.weight,0);
+  let roll=rnd(0,total);
+  for(const [k,v] of pool){ roll-=v.weight; if(roll<=0) return k; }
+  return pool.length?pool[0][0]:null;
+}
+function spawnDrop(){
+  const kind=pickItemKind(); if(!kind) return;
+  const open=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(grid[r][c]==="#"||grid[r][c]==="-") continue;
+    if(Math.hypot(c-player.c,r-player.r)<4) continue;      // not right on top of you
+    open.push({c,r});
+  }
+  if(!open.length) return;
+  const spot=open[Math.floor(rnd(0,open.length))];
+  drops.push({...spot, kind, life:640, bob:rnd(0,TAU)});
+}
+function grantItem(kind){
+  const it=ITEMS[kind];
+  if(it.hold){
+    if(slots[kind]>0){ addScore(300); say(it.icon+" SLOT FULL · +$300","#9aa0a6",70); return; }
+    slots[kind]=1;
+    say(it.icon+" "+it.name+" — PRESS "+(kind==="rocket"?"Q":"E"),it.col,110);
+    SFX.pickup();
+  } else activateItem(kind);
+}
+function activateItem(kind){
+  const it=ITEMS[kind];
+  if(kind==="rocket"){
+    if(rocketT>0) return false;
+    rocketT=it.dur; rocketInv=60;            // 1s of ghosts ignoring you
+    say(it.cry,it.col,120); SFX.rocket(); startMusic();
+    if(freezeT>0){ const b=addScore(2500);
+      say("🔥 FULL SQUEEZE COMBO! +$"+b,"#ffb300",160); SFX.cameo(); }
+  } else if(kind==="freeze"){
+    if(freezeT>0) return false;
+    freezeT=it.dur; say(it.cry,it.col,130); SFX.freeze();
+    ghosts.forEach(g=>{ if(g.out) g.frozen=true; });
+    if(rocketT>0){ const b=addScore(2500);
+      say("🔥 FULL SQUEEZE COMBO! +$"+b,"#ffb300",160); SFX.cameo(); }
+  } else if(kind==="diamond"){
+    shieldT=it.dur; say(it.cry,it.col,100); SFX.shield();
+  } else if(kind==="banana"){
+    bananaT=it.dur; say(it.cry,it.col,100); SFX.bonus();
+    ghosts.forEach(g=>{ if(g.out&&g.mode!=="eaten") g.dir={x:-g.dir.x,y:-g.dir.y}; });
+  } else if(kind==="megaphone"){
+    magnetT=it.dur; say(it.cry,it.col,100); SFX.rally();
+  }
+  return true;
+}
+function useSlot(kind){
+  if(slots[kind]<=0) return;
+  if(activateItem(kind)) slots[kind]=0;
+}
+const MODES=[[7,"scatter"],[20,"chase"],[7,"scatter"],[20,"chase"],[5,"scatter"],[999,"chase"]];
+
+/* Ghost model — every ghost carries:
+     mode          scatter | chase | frightened | eaten   (precedence: eaten > frightened > phase)
+     target        the tile it is currently steering toward
+     dir           current direction
+     speed         tiles-per-frame, derived from mode
+     home_corner   where it retreats during scatter
+     personality   which chase-targeting rule it uses                                   */
+const MODE_SPEED={ eaten:3.4, frightened:1.15, scatter:1.62, chase:1.75 };
+const GHOSTS=[
+  {name:"SHORTY",  col:"#FD0000", hat:"top",    personality:"relentless",
+   home_corner:{c:COLS-2,r:0},       blurb:"chases your exact tile"},
+  {name:"MARGIN",  col:"#ff8ad8", hat:"papers", personality:"ambusher",
+   home_corner:{c:1,r:0},            blurb:"aims 4 tiles ahead of you"},
+  {name:"SWAPS",   col:"#4fe3ff", hat:"report", personality:"pincer",
+   home_corner:{c:COLS-2,r:ROWS-1},  blurb:"pincers off Shorty"},
+  {name:"THE FUD", col:"#ff9a3c", hat:"camera", personality:"skittish",
+   home_corner:{c:1,r:ROWS-1},       blurb:"bold far, flees close"},
+];
+function newPlayer(){
+  return {c:startPos.c, r:startPos.r, x:tileX(startPos.c), y:tileY(startPos.r),
+    dir:{x:-1,y:0}, want:{x:-1,y:0}, speed:2.0, mouth:0};
+}
+function newGhosts(){
+  return GHOSTS.map((g,i)=>({...g, idx:i,
+    c:housePos[Math.min(i,housePos.length-1)].c, r:housePos[0].r,
+    x:tileX(housePos[Math.min(i,housePos.length-1)].c), y:tileY(housePos[0].r),
+    dir:{x:0,y:-1},
+    mode:"scatter",                     // current_mode
+    target:{...g.home_corner},          // target_tile
+    speed:MODE_SPEED.scatter,
+    out:i===0, outT:i*90}));
+}
+function startLevel(n){
+  level=n; loadMaze(); player=newPlayer(); ghosts=newGhosts();
+  bonus=null; bonusT=520; fright=0; frightChain=0; squeezedThisPower=0;
+  modeT=MODES[0][0]*60; modeIdx=0; readyT=110; dyingT=0; clearT=0;
+  fud=0; fudCool=900; cameo=null; cameoCool=1800;
+  resetItems();
+  startMusic();
+}
+function reset(){ score=0; lives=3; mult=1; streak=0; extraAt=25000; startLevel(1); }
+function say(t,col,dur){ msg={t,col:col||"#ffb300"}; msgT=dur||110; }
+function addScore(n){
+  const got=Math.round(n*mult); score+=got;
+  if(score>=extraAt){ lives++; extraAt+=25000; say("💎 DIAMOND HANDS ACQUIRED · +1 LIFE","#7fe7ff",130); SFX.extra(); }
+  return got;
+}
+
+/* ================= movement ================= */
+const centered=(e)=>Math.abs(e.x-tileX(e.c))<1.2&&Math.abs(e.y-tileY(e.r))<1.2;
+function canGo(c,r,d,allowDoor){
+  const nc=c+d.x, nr=r+d.y;
+  if(isDoor(nc,nr)) return !!allowDoor;
+  return !isWall(nc,nr);
+}
+function step(e,allowDoor){
+  // snap to tile centre before turning
+  if(centered(e)){
+    e.x=tileX(e.c); e.y=tileY(e.r);
+    if(e.want&&(e.want.x!==e.dir.x||e.want.y!==e.dir.y)&&canGo(e.c,e.r,e.want,allowDoor)) e.dir={...e.want};
+    if(!canGo(e.c,e.r,e.dir,allowDoor)) return false;   // blocked
+  }
+  e.x+=e.dir.x*e.speed; e.y+=e.dir.y*e.speed;
+  // tunnel wrap
+  const leftEdge=OX-T/2, rightEdge=OX+COLS*T+T/2;
+  if(e.x<leftEdge) e.x=rightEdge-2;
+  if(e.x>rightEdge) e.x=leftEdge+2;
+  e.c=Math.round((e.x-OX-T/2)/T); e.r=Math.round((e.y-OY-T/2)/T);
+  e.c=(e.c+COLS)%COLS; e.r=Math.max(0,Math.min(ROWS-1,e.r));
+  return true;
+}
+const DIRS=[{x:0,y:-1},{x:-1,y:0},{x:0,y:1},{x:1,y:0}];
+const HOUSE=()=>({c:housePos[1].c, r:housePos[1].r});
+
+/* current_mode — eaten outranks frightened, which outranks the global scatter/chase phase */
+function resolveMode(g){
+  if(g.mode==="eaten") return "eaten";
+  if(fright>0) return "frightened";
+  return MODES[modeIdx][1];
+}
+/* target_tile — one rule per personality_type */
+function resolveTarget(g){
+  switch(g.mode){
+    case "eaten":      return HOUSE();
+    case "frightened": return {c:Math.floor(rnd(0,COLS)), r:Math.floor(rnd(0,ROWS))};
+    case "scatter":    return {...g.home_corner};
+  }
+  const p=player;                                    // chase
+  if(bananaT>0) return {c:Math.floor(rnd(0,COLS)), r:Math.floor(rnd(0,ROWS))}; // 🍌 scrambled
+  switch(g.personality){
+    case "relentless": return {c:p.c, r:p.r};
+    case "ambusher":   return {c:p.c+p.dir.x*4, r:p.r+p.dir.y*4};
+    case "pincer":   { const lead=ghosts[0];
+      return {c:p.c+(p.c+p.dir.x*2-lead.c), r:p.r+(p.r+p.dir.y*2-lead.r)}; }
+    case "skittish":   return Math.hypot(g.c-p.c,g.r-p.r)>7 ? {c:p.c,r:p.r} : {...g.home_corner};
+    case "confused":   return {c:Math.floor(rnd(0,COLS)), r:Math.floor(rnd(0,ROWS))};
+    default:           return {c:p.c, r:p.r};
+  }
+}
+function resolveSpeed(g){
+  const base=MODE_SPEED[g.mode] ?? MODE_SPEED.chase;
+  return (g.mode==="eaten"||g.mode==="frightened") ? base : base+Math.min(level-1,4)*0.08;
+}
+function moveGhost(g){
+  if(g.frozen&&g.mode!=="eaten") return;          // ❄️ margin call: dead stop
+  if(!g.out){ // bob in the house until released
+    if(--g.outT<=0){ g.out=true; g.c=housePos[1].c; g.x=tileX(g.c); g.dir={x:0,y:-1}; }
+    else { g.y=tileY(housePos[0].r)+Math.sin(frame*0.1+g.idx)*4; return; }
+  }
+  g.mode=resolveMode(g);
+  g.speed=resolveSpeed(g);
+  if(thawT>0&&g.mode!=="eaten") g.speed*=0.55;    // sluggish while thawing out
+  const allowDoor = g.mode==="eaten" ||
+    (g.r<=housePos[0].r+1 && g.c>=housePos[0].c-1 && g.c<=housePos[2].c+1);
+  if(centered(g)){
+    g.x=tileX(g.c); g.y=tileY(g.r);
+    // arrived home after being squeezed -> back to the hunt
+    if(g.mode==="eaten" && g.c===housePos[1].c && g.r===housePos[1].r){
+      g.mode = fright>0 ? "frightened" : MODES[modeIdx][1];
+      g.out=true; g.dir={x:0,y:-1};
+    }
+    g.target=resolveTarget(g);
+    let best=null, bestD=Infinity;
+    for(const d of DIRS){
+      if(d.x===-g.dir.x&&d.y===-g.dir.y) continue;            // no reversing
+      if(!canGo(g.c,g.r,d,allowDoor)) continue;
+      const nc=(g.c+d.x+COLS)%COLS, nr=g.r+d.y;
+      const dd=(nc-g.target.c)**2+(nr-g.target.r)**2;
+      if(dd<bestD){ bestD=dd; best=d; }
+    }
+    if(best) g.dir=best;
+    else g.dir={x:-g.dir.x,y:-g.dir.y};
+  }
+  step(g,allowDoor);
+}
+
+/* ================= update ================= */
+function update(){
+  frame++;
+  if(msgT>0&&--msgT===0) msg=null;
+  if(state!=="play") return;
+  if(clearT>0){ if(--clearT===0){ startLevel(level+1); } return; }
+  if(dyingT>0){ if(--dyingT===0) respawn(); return; }
+  if(readyT>0){ readyT--; return; }
+
+  // global scatter <-> chase phase clock (frozen while a squeeze is running)
+  if(fright<=0 && modeIdx<MODES.length-1 && --modeT<=0){
+    modeIdx++; modeT=MODES[modeIdx][0]*60;
+    const phase=MODES[modeIdx][1];
+    ghosts.forEach(g=>{ if(g.out&&g.mode!=="eaten") g.dir={x:-g.dir.x,y:-g.dir.y}; }); // classic turnaround
+    say(phase==="chase"?"⚠ SHORTS ON THE HUNT":"SHORTS REGROUPING",
+        phase==="chase"?"#FD0000":"#9aa0a6",70);
+  }
+
+  // diamond-hands streak multiplier
+  streak++;
+  const newMult = streak>2400?3 : streak>1500?2 : streak>720?1.5 : 1;
+  if(newMult!==mult){ mult=newMult; say("💎 DIAMOND HANDS ×"+mult,"#7fe7ff",90); SFX.bonus(); }
+
+  // FUD event: the media darkens the floor and flips your controls
+  if(fud>0){ if(--fud===0) say("FUD CLEARED","#00c853",60); }
+  else if(--fudCool<=0&&level>=2){ fud=340; fudCool=rnd(1100,1800);
+    say("📉 MEDIA FUD — CONTROLS REVERSED","#ff9a3c",120); SFX.fud(); }
+
+  // ---- usable item timers ----
+  if(rocketT>0&&--rocketT===0){ say("rocket fuel spent","#9aa0a6",50); startMusic(); }
+  if(rocketInv>0) rocketInv--;
+  if(shieldT>0&&--shieldT===0) say("💎 shield faded","#9aa0a6",50);
+  if(bananaT>0) bananaT--;
+  if(magnetT>0) magnetT--;
+  if(freezeT>0&&--freezeT===0){
+    thawT=120; SFX.thaw(); say("thawing out…","#9aa0a6",60);   // 2s sluggish thaw
+    ghosts.forEach(g=>g.frozen=false);
+  }
+  if(thawT>0) thawT--;
+  // drops on the floor
+  drops=drops.filter(d=>{
+    d.bob+=0.08;
+    if(d.c===player.c&&d.r===player.r){ grantItem(d.kind); return false; }
+    return --d.life>0;
+  });
+  // rocket trail
+  if(rocketT>0&&frame%2===0) trail.push({x:player.x,y:player.y,life:22});
+  trail=trail.filter(t=>--t.life>0);
+  // megaphone magnet: nearby shares fly to you
+  if(magnetT>0&&frame%3===0){
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      if(grid[r][c]!==".") continue;
+      if(Math.hypot(c-player.c,r-player.r)>3.2) continue;
+      grid[r][c]=" "; pelletsLeft--;
+      flyers.push({x:tileX(c),y:tileY(r),life:26});
+    }
+  }
+  flyers=flyers.filter(f=>{
+    f.x+=(player.x-f.x)*0.25; f.y+=(player.y-f.y)*0.25;
+    if(--f.life<=0||Math.hypot(f.x-player.x,f.y-player.y)<6){
+      addScore(10); SFX.chomp(); return false; }
+    return true;
+  });
+
+  // player
+  player.speed=(2.0+Math.min(level-1,4)*0.05)*(rocketT>0?ROCKET_MULT:1);
+  step(player,false);
+  player.mouth+=rocketT>0?0.4:0.25;
+  // eat
+  const g=grid[player.r][player.c];
+  if(g==="."){ grid[player.r][player.c]=" "; pelletsLeft--; addScore(10); SFX.chomp();
+    if(++dropCounter>=rnd(26,40)){ dropCounter=0; if(drops.length<2) spawnDrop(); } }
+  else if(g==="o"){ grid[player.r][player.c]=" "; pelletsLeft--; addScore(50);
+    fright=440; frightChain=0; squeezedThisPower=0; startMusic();
+    say("🚀 SQUEEZE ON","#00c853",90); SFX.power();
+    ghosts.forEach(gh=>{ if(gh.out&&gh.mode!=="eaten"){
+      gh.mode="frightened"; gh.dir={x:-gh.dir.x,y:-gh.dir.y}; } }); }
+
+  if(fright>0){ if(--fright===0){ frightChain=0; startMusic(); } }
+
+  // bonus item
+  if(!bonus&&--bonusT<=0){
+    const kinds=[["🍌",500],["💎",1000],["🚀",800],["🎟️",700],["🪧",600]];
+    const k=kinds[Math.floor(rnd(0,kinds.length))];
+    bonus={c:startPos.c, r:startPos.r-4, icon:k[0], pts:k[1], life:420};
+    if(isWall(bonus.c,bonus.r)) bonus.r=startPos.r;
+  }
+  if(bonus){ if(--bonus.life<=0){ bonus=null; bonusT=rnd(500,900); }
+    else if(bonus.c===player.c&&bonus.r===player.r){
+      const got=addScore(bonus.pts); say(bonus.icon+" +$"+got,"#ffb300",80); SFX.bonus();
+      bonus=null; bonusT=rnd(600,1000); } }
+
+  // rare cameo: a red-headband ape worth a fortune
+  if(!cameo&&--cameoCool<=0){
+    const open=[]; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(grid[r][c]!=="#"&&grid[r][c]!=="-") open.push({c,r});
+    cameo={...open[Math.floor(rnd(0,open.length))], life:520};
+  }
+  if(cameo){ if(--cameo.life<=0){ cameo=null; cameoCool=rnd(1600,2600); }
+    else if(cameo.c===player.c&&cameo.r===player.r){
+      const got=addScore(5000); say("🦍 ROARING APE! +$"+got,"#FD0000",150); SFX.cameo();
+      cameo=null; cameoCool=rnd(2000,3200); } }
+
+  ghosts.forEach(moveGhost);
+
+  // collisions
+  for(const gh of ghosts){
+    if(!gh.out||gh.mode==="eaten") continue;
+    if(Math.hypot(gh.x-player.x, gh.y-player.y)<T*0.62){
+      if(fright>0||gh.frozen){                      // squeezable: scared OR iced
+        frightChain=Math.min(frightChain+1,4); squeezedThisPower++;
+        const pts=200*Math.pow(2,frightChain-1);
+        const got=addScore(pts);
+        gh.mode="eaten"; gh.frozen=false; gh.dir={x:-gh.dir.x,y:-gh.dir.y};
+        say((gh.frozen?"ICED! +$":"SQUEEZED! +$")+got,"#00c853",70); SFX.squeeze();
+        if(squeezedThisPower===4){ const b=addScore(10000);
+          say("🔥 FULL SQUEEZE — ALL FOUR! +$"+b,"#ffb300",180); SFX.cameo(); }
+      }
+      else if(rocketInv>0){ /* rocket ignition frames — they can't touch you */ }
+      else if(shieldT>0){                           // 💎 eats one hit
+        shieldT=0; rocketInv=75;
+        gh.dir={x:-gh.dir.x,y:-gh.dir.y};
+        say("💎 DIAMOND HANDS HELD — SHIELD BROKE","#7fe7ff",120); SFX.shield();
+      }
+      else { die(); return; }
+    }
+  }
+  // level clear
+  if(pelletsLeft<=0){
+    const b=addScore(5000+level*1000);
+    say("MOON MISSION COMPLETE +$"+b,"#00c853",160);
+    SFX.levelclear(); stopMusic(); clearT=170;
+  }
+}
+function die(){
+  lives--; dyingT=110; mult=1; streak=0; stopMusic();
+  say("🧻 PAPER HANDS — SOLD TOO EARLY","#FD0000",110); SFX.die();
+  if(lives<=0){ state="over";
+    if(score>hi){ hi=score; hiName="APE"; try{ localStorage.setItem("gmeTendieHi",JSON.stringify({score:hi,name:hiName})); }catch(_){}}
+  }
+}
+function respawn(){
+  if(state==="over") return;
+  player=newPlayer(); ghosts=newGhosts(); fright=0; readyT=90; fud=0;
+  rocketT=rocketInv=freezeT=thawT=shieldT=bananaT=magnetT=0; flyers=[]; trail=[];
+  startMusic();
+}
+
+/* ================= input ================= */
+const keys={};
+function exitGame(){
+  stopMusic();
+  try{ if(window.opener&&!window.opener.closed){ window.close(); return; } }catch(_){}
+  if(history.length>1) history.back(); else location.href="index.html";
+  setTimeout(()=>{ try{ window.close(); }catch(_){} },150);
+}
+document.getElementById("exitBtn").onclick=exitGame;
+const DIRKEY={arrowup:{x:0,y:-1},w:{x:0,y:-1},arrowdown:{x:0,y:1},s:{x:0,y:1},
+  arrowleft:{x:-1,y:0},a:{x:-1,y:0},arrowright:{x:1,y:0},d:{x:1,y:0}};
+addEventListener("keydown",e=>{
+  const k=e.key.toLowerCase();
+  if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(k)) e.preventDefault();
+  keys[k]=true;
+  if(DIRKEY[k]&&state==="play"&&player){
+    let d={...DIRKEY[k]};
+    if(fud>0){ d={x:-d.x, y:-d.y}; }     // media FUD reverses you
+    player.want=d;
+  }
+  if(e.key==="Enter"&&(state==="menu"||state==="over")){ reset(); state="play"; SFX.power(); }
+  if(k==="p"&&(state==="play"||state==="pause")){
+    state=state==="play"?"pause":"play"; state==="play"?startMusic():stopMusic(); }
+  if(k==="m"){ audioOn=!audioOn; if(!audioOn) stopMusic(); else if(state==="play") startMusic(); }
+  if(k==="g") showAI=!showAI;
+  if(state==="play"){
+    if(k==="q"||k==="1") useSlot("rocket");
+    if(k==="e"||k==="2") useSlot("freeze");
+  }
+  if(e.key==="Escape"){ if(state==="play"){ state="pause"; stopMusic(); } else exitGame(); }
+});
+addEventListener("keyup",e=>{ keys[e.key.toLowerCase()]=false; });
+
+/* ================= draw ================= */
+function drawMaze(){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const ch=grid[r][c], x=OX+c*T, y=OY+r*T;
+    if(ch==="#"){
+      const gr=ctx.createLinearGradient(x,y,x,y+T);
+      gr.addColorStop(0,"#1b2a6b"); gr.addColorStop(1,"#0d1436");
+      ctx.fillStyle=gr; ctx.fillRect(x+1,y+1,T-2,T-2);
+      ctx.strokeStyle="rgba(120,170,255,.35)"; ctx.lineWidth=1;
+      ctx.strokeRect(x+1.5,y+1.5,T-3,T-3);
+    } else if(ch==="-"){
+      ctx.fillStyle="#ff8ad8"; ctx.fillRect(x+2,y+T/2-2,T-4,4);
+    } else if(ch==="."){
+      ctx.fillStyle="#ffd9a8"; ctx.beginPath(); ctx.arc(x+T/2,y+T/2,2.6,0,TAU); ctx.fill();
+    } else if(ch==="o"){
+      const p=3+Math.sin(frame*0.15)*1.4;
+      ctx.fillStyle="#00c853"; ctx.shadowColor="#00c853"; ctx.shadowBlur=12;
+      ctx.beginPath(); ctx.arc(x+T/2,y+T/2,5+p*0.4,0,TAU); ctx.fill(); ctx.shadowBlur=0;
+    }
+  }
+}
+function drawPlayer(){
+  const p=player, open=Math.abs(Math.sin(p.mouth))*0.32+0.04;
+  // rocket exhaust trail
+  trail.forEach(t=>{ ctx.globalAlpha=t.life/22*0.6;
+    ctx.fillStyle=t.life>12?"#ffb300":"#FD0000";
+    ctx.beginPath(); ctx.arc(t.x,t.y,t.life/22*8,0,TAU); ctx.fill(); ctx.globalAlpha=1; });
+  // 💎 shield aura
+  if(shieldT>0){
+    const pulse=1+Math.sin(frame*0.2)*0.08, blink=shieldT<120&&frame%12<6;
+    ctx.globalAlpha=blink?0.35:0.9;
+    ctx.strokeStyle="#7fe7ff"; ctx.lineWidth=2.2; ctx.shadowColor="#7fe7ff"; ctx.shadowBlur=14;
+    ctx.beginPath(); ctx.arc(p.x,p.y,T*0.62*pulse,0,TAU); ctx.stroke();
+    ctx.shadowBlur=0; ctx.globalAlpha=1;
+    ctx.font="9px serif"; ctx.textAlign="center";
+    for(let i=0;i<3;i++){ const a=frame*0.05+i*TAU/3;
+      ctx.fillText("💎",p.x+Math.cos(a)*T*0.62,p.y+Math.sin(a)*T*0.62); }
+  }
+  const a=Math.atan2(p.dir.y,p.dir.x);
+  ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(a);
+  // ape-green chomper with a grin
+  const gr=ctx.createRadialGradient(-3,-3,2,0,0,T*0.5);
+  gr.addColorStop(0,"#8dffb0"); gr.addColorStop(1,fright>0?"#00e676":"#00c853");
+  ctx.fillStyle=gr;
+  ctx.beginPath(); ctx.moveTo(0,0);
+  ctx.arc(0,0,T*0.46,open*Math.PI,TAU-open*Math.PI); ctx.closePath(); ctx.fill();
+  ctx.rotate(-a);
+  ctx.fillStyle="#06331a"; ctx.beginPath(); ctx.arc(-3,-6,2.4,0,TAU); ctx.fill();
+  if(fright>0||rocketT>0){ // boosters while powered up
+    ctx.font=(rocketT>0?"15px":"12px")+" serif"; ctx.textAlign="center";
+    ctx.fillText(rocketT>0?"🚀":"🔥",-p.dir.x*16,-p.dir.y*16+4); }
+  ctx.restore();
+  // diamond-hands necklace
+  ctx.font="10px serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText("💎",p.x,p.y+T*0.42);
+}
+function ghostBody(x,y,col,alpha){
+  ctx.globalAlpha=alpha??1;
+  ctx.fillStyle=col; ctx.beginPath();
+  ctx.arc(x,y-2,T*0.40,Math.PI,0); ctx.lineTo(x+T*0.40,y+T*0.36);
+  for(let i=0;i<4;i++){ const w=T*0.20;
+    ctx.lineTo(x+T*0.40-w*(i+0.5), y+T*0.36-(i%2?0:6));
+    ctx.lineTo(x+T*0.40-w*(i+1),   y+T*0.36); }
+  ctx.closePath(); ctx.fill(); ctx.globalAlpha=1;
+}
+function drawGhost(g){
+  const x=g.x, y=g.y;
+  if(g.mode==="eaten"){ // just eyes floating home
+    ctx.fillStyle="#fff";
+    ctx.beginPath(); ctx.arc(x-6,y-4,4.5,0,TAU); ctx.arc(x+6,y-4,4.5,0,TAU); ctx.fill();
+    ctx.fillStyle="#1b2a6b";
+    ctx.beginPath(); ctx.arc(x-6+g.dir.x*2,y-4+g.dir.y*2,2.2,0,TAU);
+    ctx.arc(x+6+g.dir.x*2,y-4+g.dir.y*2,2.2,0,TAU); ctx.fill();
+    return;
+  }
+  if(g.frozen){                                  // ❄️ iced solid, stamped SOLD
+    ghostBody(x,y,"#9fdcff");
+    ctx.strokeStyle="#e8f8ff"; ctx.lineWidth=1.2;
+    for(let i=0;i<4;i++){ const a=i*TAU/4+frame*0.01;
+      ctx.beginPath(); ctx.moveTo(x+Math.cos(a)*5,y+Math.sin(a)*5);
+      ctx.lineTo(x+Math.cos(a)*11,y+Math.sin(a)*11); ctx.stroke(); }
+    ctx.save(); ctx.translate(x,y-1); ctx.rotate(-0.25);
+    ctx.strokeStyle="#FD0000"; ctx.lineWidth=1.4; ctx.strokeRect(-15,-6,30,12);
+    ctx.fillStyle="#FD0000"; ctx.font="bold 9px Consolas,monospace";
+    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("SOLD",0,0);
+    ctx.restore();
+    ctx.globalAlpha=.35; ctx.fillStyle="#dff4ff";
+    ctx.beginPath(); ctx.arc(x,y,T*0.46,0,TAU); ctx.fill(); ctx.globalAlpha=1;
+    return;
+  }
+  if(g.mode==="frightened"){
+    const flash=fright<120&&frame%16<8;
+    ghostBody(x,y,flash?"#e8e8e8":"#3355ff");
+    ctx.fillStyle="#fff"; ctx.font="9px Consolas,monospace"; ctx.textAlign="center";
+    ctx.fillText("🧻",x,y-2);
+    ctx.strokeStyle="#fff"; ctx.lineWidth=1.4; ctx.beginPath();
+    for(let i=0;i<4;i++){ ctx.moveTo(x-9+i*6,y+8); ctx.lineTo(x-6+i*6,y+5); }
+    ctx.stroke();
+    return;
+  }
+  ghostBody(x,y,g.col);
+  // eyes follow direction
+  ctx.fillStyle="#fff";
+  ctx.beginPath(); ctx.arc(x-6,y-4,4.5,0,TAU); ctx.arc(x+6,y-4,4.5,0,TAU); ctx.fill();
+  ctx.fillStyle="#101010";
+  ctx.beginPath(); ctx.arc(x-6+g.dir.x*2,y-4+g.dir.y*2,2.2,0,TAU);
+  ctx.arc(x+6+g.dir.x*2,y-4+g.dir.y*2,2.2,0,TAU); ctx.fill();
+  // accessories
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  if(g.hat==="top"){ ctx.fillStyle="#111"; ctx.fillRect(x-9,y-19,18,4); ctx.fillRect(x-6,y-27,12,9);
+    ctx.strokeStyle="#ffb300"; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(x+9,y-3,4,0,TAU); ctx.stroke(); }
+  else if(g.hat==="papers"){ ctx.font="11px serif"; ctx.fillText("📄",x+11,y+8); }
+  else if(g.hat==="report"){ ctx.font="11px serif"; ctx.fillText("📉",x+11,y+8); }
+  else if(g.hat==="camera"){ ctx.font="12px serif"; ctx.fillText("🎤",x-11,y+8); }
+}
+/* press G: show each ghost's live mode + target tile */
+function drawAIOverlay(){
+  ghosts.forEach(g=>{
+    if(!g.out||!g.target) return;
+    const tx=tileX((g.target.c+COLS)%COLS), ty=tileY(Math.max(0,Math.min(ROWS-1,g.target.r)));
+    ctx.globalAlpha=.85; ctx.strokeStyle=g.col; ctx.lineWidth=1.5;
+    ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(g.x,g.y); ctx.lineTo(tx,ty); ctx.stroke();
+    ctx.setLineDash([]); ctx.strokeRect(tx-T/2+3,ty-T/2+3,T-6,T-6);
+    ctx.fillStyle=g.col; ctx.font="bold 8px Consolas,monospace"; ctx.textAlign="center";
+    ctx.fillText(g.mode.toUpperCase(),g.x,g.y-T*0.55);
+    ctx.globalAlpha=1;
+  });
+  ctx.fillStyle="#9aa0a6"; ctx.font="10px Consolas,monospace"; ctx.textAlign="left";
+  ctx.fillText("AI DEBUG (G) · phase: "+MODES[modeIdx][1].toUpperCase()
+    +"  next in "+Math.ceil(modeT/60)+"s",14,OY+ROWS*T+18);
+}
+function drawHUD(){
+  ctx.textAlign="left"; ctx.fillStyle="#00c853"; ctx.font="bold 19px Consolas,monospace";
+  ctx.fillText("$"+score.toLocaleString(),14,26);
+  ctx.fillStyle="#9aa0a6"; ctx.font="11px Consolas,monospace";
+  ctx.fillText("HALL OF APES  $"+Math.max(hi,score).toLocaleString(),14,44);
+  ctx.textAlign="center"; ctx.fillStyle="#fff"; ctx.font="bold 13px Oswald,sans-serif";
+  ctx.fillText(LEVEL_NAMES[(level-1)%LEVEL_NAMES.length],cv.width/2,26);
+  if(mult>1){ ctx.fillStyle="#7fe7ff"; ctx.font="bold 12px Consolas,monospace";
+    ctx.fillText("💎 ×"+mult,cv.width/2,45); }
+  ctx.textAlign="right"; ctx.font="15px serif";
+  for(let i=0;i<Math.min(lives,5);i++) ctx.fillText("🦍",cv.width-14-i*20,28);
+  // inventory slots + active timers
+  const y=OY+ROWS*T+14;
+  [["rocket","Q"],["freeze","E"]].forEach(([kind,key],i)=>{
+    const x=cv.width/2-70+i*80, it=ITEMS[kind], held=slots[kind]>0;
+    const active = kind==="rocket"?rocketT:freezeT;
+    ctx.strokeStyle=held||active>0?it.col:"#2a2a3a"; ctx.lineWidth=held?2:1;
+    ctx.fillStyle=held?"rgba(255,255,255,.06)":"rgba(255,255,255,.02)";
+    ctx.beginPath(); ctx.roundRect(x-26,y-14,52,30,8); ctx.fill(); ctx.stroke();
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    if(active>0){
+      ctx.fillStyle=it.col; ctx.font="bold 12px Consolas,monospace";
+      ctx.fillText(it.icon+" "+Math.ceil(active/60)+"s",x,y+1);
+    } else if(held){
+      ctx.font="16px serif"; ctx.globalAlpha=frame%40<20?1:.75;
+      ctx.fillText(it.icon,x-8,y+1); ctx.globalAlpha=1;
+      ctx.fillStyle=it.col; ctx.font="bold 11px Consolas,monospace"; ctx.fillText(key,x+13,y+1);
+    } else {
+      ctx.fillStyle="#33334a"; ctx.font="bold 10px Consolas,monospace"; ctx.fillText(key,x,y+1);
+    }
+  });
+  // other active effects
+  const badges=[];
+  if(shieldT>0) badges.push(["💎",Math.ceil(shieldT/60),"#7fe7ff"]);
+  if(bananaT>0) badges.push(["🍌",Math.ceil(bananaT/60),"#ffe066"]);
+  if(magnetT>0) badges.push(["📣",Math.ceil(magnetT/60),"#ff8ad8"]);
+  badges.forEach((b,i)=>{ ctx.fillStyle=b[2]; ctx.font="bold 12px Consolas,monospace";
+    ctx.textAlign="left"; ctx.fillText(b[0]+b[1]+"s",cv.width-96+i*34,y+4); });
+}
+function draw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.fillStyle="#04040a"; ctx.fillRect(0,0,cv.width,cv.height);
+  if(state==="menu"){ drawMenu(); return; }
+  drawMaze();
+  if(bonus) { ctx.font="19px serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(bonus.icon,tileX(bonus.c),tileY(bonus.r)); }
+  // usable items lying in the maze
+  drops.forEach(d=>{
+    const it=ITEMS[d.kind], x=tileX(d.c), y=tileY(d.r)+Math.sin(d.bob)*3;
+    if(d.life<120&&frame%12<6) return;                 // blink out
+    ctx.globalAlpha=.9; ctx.fillStyle=it.col; ctx.shadowColor=it.col; ctx.shadowBlur=14;
+    ctx.beginPath(); ctx.arc(x,y,11,0,TAU); ctx.fill(); ctx.shadowBlur=0; ctx.globalAlpha=1;
+    ctx.font="16px serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(it.icon,x,y);
+  });
+  // pellets flying in from the megaphone
+  flyers.forEach(f=>{ ctx.fillStyle="#ffd9a8";
+    ctx.beginPath(); ctx.arc(f.x,f.y,3,0,TAU); ctx.fill(); });
+  if(cameo){ ctx.font="20px serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.globalAlpha=cameo.life<90&&frame%12<6?0.4:1;
+    ctx.fillText("🦍",tileX(cameo.c),tileY(cameo.r));
+    ctx.font="bold 7px Consolas,monospace"; ctx.fillStyle="#FD0000";
+    ctx.fillText("HODL",tileX(cameo.c),tileY(cameo.r)+13); ctx.globalAlpha=1; }
+  ghosts.forEach(drawGhost);
+  if(showAI) drawAIOverlay();
+  if(dyingT<=0||frame%8<4) drawPlayer();
+  // FUD darkness
+  if(fud>0){
+    const grd=ctx.createRadialGradient(player.x,player.y,30,player.x,player.y,190);
+    grd.addColorStop(0,"rgba(0,0,0,0)"); grd.addColorStop(1,"rgba(0,0,0,.93)");
+    ctx.fillStyle=grd; ctx.fillRect(0,OY,cv.width,ROWS*T);
+    ctx.fillStyle="#ff9a3c"; ctx.font="bold 12px Consolas,monospace"; ctx.textAlign="center";
+    ctx.fillText("📉 FUD — CONTROLS REVERSED  "+Math.ceil(fud/60)+"s",cv.width/2,OY+ROWS*T+22);
+  }
+  drawHUD();
+  if(readyT>0){ ctx.textAlign="center"; ctx.fillStyle="#ffb300";
+    ctx.font="bold 22px Oswald,sans-serif";
+    ctx.fillText(readyT>60?"GET READY":"BUY THE DIP!",cv.width/2,tileY(startPos.r-2)); }
+  if(msg){ ctx.textAlign="center"; ctx.fillStyle=msg.col;
+    ctx.font="bold 15px Consolas,monospace";
+    ctx.fillText(msg.t,cv.width/2,OY+ROWS*T+46); }
+  if(state==="pause") overlay("PAUSED","P to resume · ESC to exit to the calculator");
+  if(state==="over") drawOver();
+}
+function overlay(a,b){
+  ctx.fillStyle="rgba(0,0,0,.68)"; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.textAlign="center"; ctx.fillStyle="#fff"; ctx.font="bold 38px Oswald,sans-serif";
+  ctx.fillText(a,cv.width/2,cv.height/2-10);
+  ctx.fillStyle="#9aa0a6"; ctx.font="13px Consolas,monospace";
+  ctx.fillText(b,cv.width/2,cv.height/2+22);
+}
+function drawOver(){
+  ctx.fillStyle="rgba(0,0,0,.75)"; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.textAlign="center";
+  ctx.fillStyle="#fff"; ctx.font="bold 34px Oswald,sans-serif";
+  ctx.fillText("SHORTS WIN THE DAY",cv.width/2,cv.height/2-90);
+  const v = score>=60000?["HEALTHY · APE STRONG","#00c853"]
+          : score>=30000?["STRUGGLING · STILL HODLING","#ffb300"]
+          : score>=12000?["CRITICAL · MARGIN CALLING","#e8843a"]
+          : ["DEAD ON ARRIVAL · 0/100","#FD0000"];
+  ctx.fillStyle=v[1]; ctx.font="bold 17px Oswald,sans-serif"; ctx.fillText(v[0],cv.width/2,cv.height/2-58);
+  ctx.fillStyle="#00c853"; ctx.font="bold 24px Consolas,monospace";
+  ctx.fillText("FINAL $"+score.toLocaleString(),cv.width/2,cv.height/2-18);
+  ctx.fillStyle="#ffb300"; ctx.font="14px Consolas,monospace";
+  ctx.fillText(score>=hi&&score>0?"★ NEW HALL OF APES RECORD ★":"HALL OF APES  $"+hi.toLocaleString(),cv.width/2,cv.height/2+12);
+  ctx.fillStyle="#9aa0a6"; ctx.font="13px Consolas,monospace";
+  ctx.fillText("ENTER to buy back in",cv.width/2,cv.height/2+50);
+  ctx.fillStyle="#6b6b6b"; ctx.font="11px Consolas,monospace";
+  ctx.fillText("ESC to exit to the calculator",cv.width/2,cv.height/2+72);
+}
+function drawMenu(){
+  ctx.textAlign="center";
+  ctx.fillStyle="#fff"; ctx.font="bold 40px Oswald,sans-serif"; ctx.fillText("TENDIE CHOMP",cv.width/2,90);
+  ctx.fillStyle="#FD0000"; ctx.font="bold 13px Oswald,sans-serif"; ctx.letterSpacing="4px";
+  ctx.fillText("POWER TO THE PLAYERS",cv.width/2,116); ctx.letterSpacing="0px";
+  ctx.font="34px serif"; ctx.fillText("🦍",cv.width/2,175);
+  GHOSTS.forEach((g,i)=>{ const y=225+i*30;
+    ghostBody(cv.width/2-120,y,g.col);
+    ctx.fillStyle=g.col; ctx.font="bold 13px Consolas,monospace"; ctx.textAlign="left";
+    ctx.fillText(g.name,cv.width/2-95,y+4);
+    ctx.fillStyle="#9aa0a6"; ctx.font="11px Consolas,monospace";
+    ctx.fillText(g.blurb,cv.width/2-15,y+4); });
+  ctx.textAlign="center"; ctx.fillStyle="#9aa0a6"; ctx.font="11px Consolas,monospace";
+  const t=["Chomp shares (+$10). Green pellets = SQUEEZE the shorts:",
+           "$200 → $400 → $800 → $1,600 · all four at once: +$10,000",
+           "",
+           "🚀 YOLO FUEL  hold, press Q — 1.7× speed, 7s      🍌 TENDIE BOMB  scrambles them",
+           "❄️ MARGIN CALL  hold, press E — freeze 6s, still edible",
+           "💎 DIAMOND SHIELD  eats one hit      📣 REDDIT RALLY  shares fly to you",
+           "",
+           "🚀+❄️ together = FULL SQUEEZE · 🦍 ape cameo +$5,000"];
+  t.forEach((s,i)=>ctx.fillText(s,cv.width/2,368+i*17));
+  ctx.fillStyle="#ffb300"; ctx.font="bold 16px Oswald,sans-serif";
+  if(frame%60<40) ctx.fillText("PRESS ENTER TO START",cv.width/2,520);
+  ctx.fillStyle="#9aa0a6"; ctx.font="11px Consolas,monospace";
+  ctx.fillText("HALL OF APES  $"+hi.toLocaleString(),cv.width/2,548);
+}
+loadMaze(); player=newPlayer(); ghosts=newGhosts();
+(function loop(){ update(); if(state!=="play") frame++; draw(); requestAnimationFrame(loop); })();
+</script>
+</body>
+</html>

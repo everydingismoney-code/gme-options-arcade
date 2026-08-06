@@ -1,0 +1,3017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GME Options Command — Power to the Players</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --panel:#000000; --panel2:#141414; --border:#2e2e2e;
+    --text:#FFFFFF; --muted:#9aa0a6; --green:#00c853; --red:#FD0000;
+    --accent:#FD0000; --gold:#ffb300;
+    --head:"Oswald","Impact","Arial Black",sans-serif;
+    --data:"Roboto","Segoe UI",sans-serif;
+    --mono:"Roboto Mono",Consolas,monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:#111; font-family:var(--data); padding:0 20px 20px; min-height:100vh;}
+  .topbar{display:flex; align-items:stretch; justify-content:space-between;
+    background:linear-gradient(90deg,#000 0%,#12002b 55%,#2a0140 100%);
+    margin:0 -20px 18px; padding:0; border-bottom:4px solid var(--red);}
+  .logo{display:flex; align-items:center; font-family:var(--head); font-weight:700;
+    font-size:1.75rem; letter-spacing:2px; text-transform:uppercase; white-space:nowrap; flex:0 0 auto;}
+  .logo .blk{padding:12px 12px 12px 24px;
+    background:linear-gradient(180deg,#ffffff 0%,#f2f2f2 44%,#9c9c9c 52%,#dedede 78%,#ffffff 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 1px 0 rgba(0,0,0,.8)) drop-shadow(0 0 12px rgba(255,255,255,.28));}
+  .logo .red{position:relative; color:#fff; padding:12px 18px; margin-left:6px; border-radius:4px;
+    background:linear-gradient(180deg,#ff5a5a 0%,#fd0000 46%,#b00000 54%,#ff2b2b 100%);
+    text-shadow:0 1px 2px rgba(0,0,0,.55); box-shadow:0 0 18px rgba(253,0,0,.55), inset 0 1px 0 rgba(255,255,255,.5);
+    overflow:hidden;}
+  .logo .red::after{content:""; position:absolute; left:0; right:0; top:0; height:48%;
+    background:linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0)); pointer-events:none;}
+  .ticker{flex:1 1 auto; min-width:0; overflow:hidden; display:flex; align-items:center;
+    margin:0 14px; border-left:2px solid var(--red); border-right:2px solid var(--red);
+    background:#0a0a0a; align-self:center; height:34px;}
+  .tick-track{display:flex; gap:26px; white-space:nowrap; padding-left:14px;
+    animation:tickscroll 45s linear infinite; will-change:transform;}
+  .ticker:hover .tick-track{animation-play-state:paused;}
+  @keyframes tickscroll{from{transform:translateX(0);} to{transform:translateX(-50%);}}
+  .tick{font-family:var(--mono); font-size:.75rem; color:#c9c9c9; display:inline-flex;
+    gap:6px; align-items:center; flex:0 0 auto;}
+  .tick b{color:#fff; font-family:var(--head); letter-spacing:.5px; font-size:.82rem;}
+  .tick .up{color:var(--green);} .tick .dn{color:var(--red);}
+  .tick .px{color:#fff;}
+  .tick .sep{color:#444;}
+  .tick .val{color:#ffc53d; font-weight:700; text-shadow:0 0 8px rgba(255,197,61,.45);}
+  .tick.stock{padding:2px 8px; background:rgba(253,0,0,.12); border-left:2px solid var(--red); border-radius:3px;}
+  .tick.stock b{font-size:.92rem;}
+  .tick .big-px{color:#fff; font-weight:700; font-size:.88rem;}
+  @media(max-width:900px){.ticker{display:none;}}
+  .tag{display:flex; align-items:center; padding-right:24px; color:#fff; font-family:var(--head);
+    font-weight:500; letter-spacing:3px; font-size:.8rem; text-transform:uppercase; flex:0 0 auto;}
+  .tag b{color:var(--red); margin-right:6px;}
+  h1{font-size:1.35rem; margin-bottom:4px; font-family:var(--head); text-transform:uppercase;}
+  .sub{color:#555; font-size:.85rem; margin-bottom:18px;}
+  /* ---------- Vice City backdrop, GME panels ---------- */
+  body{position:relative; overflow-x:hidden;}
+  body::before{content:""; position:fixed; inset:0; z-index:-2;
+    background:
+      radial-gradient(120% 80% at 50% 108%, #ff2f8e 0%, #c81f7a 16%, #6d1f9c 36%, #2b1a6b 58%, #0d0b26 82%, #05040f 100%),
+      linear-gradient(180deg, #05040f 0%, #0d0b26 40%, #1a0f3d 100%);}
+  body::after{content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(38% 26% at 50% 100%, rgba(255,200,60,.28), transparent 70%),
+      radial-gradient(50% 30% at 12% 8%, rgba(0,229,255,.14), transparent 70%),
+      radial-gradient(45% 28% at 88% 14%, rgba(255,47,142,.14), transparent 70%),
+      repeating-linear-gradient(180deg, rgba(0,229,255,.05) 0 1px, transparent 1px 46px),
+      repeating-linear-gradient(90deg, rgba(255,47,142,.04) 0 1px, transparent 1px 46px);}
+  /* title row: 8 ball + words, nothing boxed */
+  .titlebar{max-width:1250px; margin:0 auto 18px; display:flex; align-items:center; justify-content:center; gap:18px;}
+  .eightball{width:120px; height:120px; flex:0 0 auto;
+    filter:drop-shadow(0 0 22px rgba(40,80,255,.35)) drop-shadow(0 8px 18px rgba(0,0,0,.65));}
+  .titletext{text-align:left;}
+  .titletext h1{font-size:2.1rem; letter-spacing:1.5px; margin:0;
+    background:linear-gradient(180deg,#fff 32%,#ff8fc4 100%); -webkit-background-clip:text;
+    background-clip:text; color:transparent; text-shadow:0 0 26px rgba(255,47,142,.3);}
+  .titletext .sub{color:#c4b3de; margin:2px 0 0; font-size:.85rem;}
+  .led{margin-top:8px; height:4px; width:100%; border-radius:99px;
+    background:linear-gradient(90deg, transparent, #ffb300 10%, #ffe082 50%, #ffb300 90%, transparent);
+    box-shadow:0 0 12px 2px rgba(255,179,0,.7), 0 0 34px 8px rgba(255,179,0,.32);
+    transition:background .25s, box-shadow .25s;}
+  .led.calc{animation:ledflicker .5s linear infinite;}
+  .led.good{background:linear-gradient(90deg,transparent,#00e676 10%,#b9f6ca 50%,#00e676 90%,transparent);
+    box-shadow:0 0 14px 3px rgba(0,230,118,.75), 0 0 40px 10px rgba(0,230,118,.4);}
+  .led.bad{background:linear-gradient(90deg,transparent,#ff1744 10%,#ff8a80 50%,#ff1744 90%,transparent);
+    box-shadow:0 0 14px 3px rgba(255,23,68,.75), 0 0 40px 10px rgba(255,23,68,.4);}
+  @keyframes ledflicker{0%,100%{opacity:1;} 45%{opacity:.35;} 60%{opacity:.9;} 75%{opacity:.5;}}
+  /* the original two-column layout, aligned and level */
+  .grid{display:grid; grid-template-columns:340px 1fr; gap:16px; max-width:1250px; margin:0 auto;
+    align-items:start;}
+  .col-left,.col-right{display:flex; flex-direction:column; gap:16px;}
+  .col-left > .card,.col-right > .card{margin-top:0 !important;}
+  @media(max-width:900px){.grid{grid-template-columns:1fr;} .titlebar{flex-direction:column; gap:10px;}
+    .titletext{text-align:center;}}
+  .tag{display:flex; align-items:center; padding-right:24px; color:#fff; font-family:var(--head);
+    font-weight:500; letter-spacing:3px; font-size:.8rem; text-transform:uppercase; flex:0 0 auto;}
+  .tag b{color:var(--red); margin-right:6px;}
+  h1{font-size:1.35rem; margin-bottom:4px; font-family:var(--head); text-transform:uppercase;}
+  .sub{color:#555; font-size:.85rem; margin-bottom:18px;}
+  .card{background:var(--panel); border:1px solid #000; border-radius:12px; padding:16px; color:var(--text);
+    box-shadow:0 2px 10px rgba(0,0,0,.25);}
+  .card h2{font-size:1rem; margin-bottom:12px; color:#fff; font-family:var(--head); text-transform:uppercase;
+    letter-spacing:1px; border-left:4px solid var(--red); padding-left:8px;}
+  label{display:block; font-size:.72rem; color:var(--muted); margin:10px 0 3px; text-transform:uppercase;
+    letter-spacing:.5px;}
+  input,select,button{font:inherit;}
+  input,select{width:100%; background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    border-radius:6px; padding:7px 9px; font-size:.9rem; font-family:var(--data);}
+  input[type=number]{font-family:var(--mono);}
+  input:focus,select:focus{outline:2px solid var(--red); border-color:var(--red);}
+  .row{display:flex; gap:8px;}
+  .row > *{flex:1;}
+  button{background:var(--red); color:#fff; border:none; border-radius:6px; padding:9px 12px;
+    font-weight:700; cursor:pointer; width:100%; margin-top:10px; font-family:var(--head);
+    text-transform:uppercase; letter-spacing:1.5px;}
+  button:hover{filter:brightness(1.15);}
+  button{transition:transform .07s ease;}
+  button:active{transform:scale(.93);}
+  button.pressed{animation:pressflash .38s ease-out;}
+  @keyframes pressflash{
+    0%{box-shadow:0 0 0 0 rgba(253,0,0,.75); filter:brightness(1.6);}
+    100%{box-shadow:0 0 0 14px rgba(253,0,0,0); filter:brightness(1);}}
+  tr.rowhit td{animation:rowflash .4s ease-out;}
+  @keyframes rowflash{0%{background:rgba(253,0,0,.4);}100%{background:transparent;}}
+  #fx{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:9998; display:none;}
+  #fxBanner{position:fixed; left:50%; top:26%; transform:translate(-50%,-50%) scale(.6); z-index:9999;
+    pointer-events:none; opacity:0; font-family:var(--head); font-size:2.6rem; letter-spacing:3px;
+    text-transform:uppercase; white-space:nowrap; text-align:center;
+    background:linear-gradient(180deg,#fff 20%,#ffd54f 55%,#ff9800 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 22px rgba(255,193,7,.8)) drop-shadow(0 3px 8px rgba(0,0,0,.8));}
+  #fxBanner.pop{animation:bannerpop 2.6s cubic-bezier(.2,.9,.2,1) forwards;}
+  @keyframes bannerpop{
+    0%{opacity:0; transform:translate(-50%,-50%) scale(.5) rotate(-6deg);}
+    14%{opacity:1; transform:translate(-50%,-50%) scale(1.14) rotate(2deg);}
+    26%{transform:translate(-50%,-50%) scale(1) rotate(0);}
+    76%{opacity:1;} 100%{opacity:0; transform:translate(-50%,-56%) scale(1.02);}}
+  .errshake{animation:errshake .5s cubic-bezier(.36,.07,.19,.97) both;}
+  @keyframes errshake{
+    10%,90%{transform:translateX(-2px);} 20%,80%{transform:translateX(4px);}
+    30%,50%,70%{transform:translateX(-7px);} 40%,60%{transform:translateX(7px);}}
+  .errmsg{animation:errpop .45s ease-out; border-left:4px solid var(--red);
+    background:rgba(253,0,0,.1); padding:8px 10px; border-radius:6px;}
+  @keyframes errpop{
+    0%{opacity:0; transform:scale(.94); background:rgba(253,0,0,.5);}
+    60%{transform:scale(1.02);} 100%{opacity:1; transform:scale(1); background:rgba(253,0,0,.1);}}
+  .typing::after{content:"▌"; animation:blink .6s steps(1) infinite; color:var(--red);}
+  @keyframes blink{50%{opacity:0;}}
+  .okmsg{animation:okpop .4s ease-out;}
+  @keyframes okpop{0%{opacity:0; transform:translateY(-4px);} 100%{opacity:1; transform:none;}}
+  #sndBtn{width:auto; margin:0 0 0 14px; padding:2px 8px; font-size:1rem; background:transparent;
+    border:1px solid #444; border-radius:6px; line-height:1.4;}
+  #sndBtn:hover{border-color:var(--red); background:rgba(253,0,0,.15);}
+  button.secondary{background:#000; color:#fff; border:1px solid #444; letter-spacing:1px;}
+  .powerbtn::before{content:"⏻"; margin-right:8px; font-weight:400;}
+  .toggle{display:flex; border:1px solid var(--border); border-radius:6px; overflow:hidden; margin-top:3px;}
+  .toggle div{flex:1; text-align:center; padding:7px; cursor:pointer; background:var(--panel2);
+    font-size:.9rem; font-family:var(--head); letter-spacing:1px;}
+  .toggle div.active.call{background:#003a17; color:var(--green); font-weight:700;}
+  .toggle div.active.put{background:#3a0000; color:var(--red); font-weight:700;}
+  #status{font-size:.78rem; margin-top:8px; color:var(--muted); min-height:1.2em; white-space:pre-wrap;}
+  #status.err{color:var(--red);}
+  #status.ok{color:var(--green);}
+  .big{font-size:2.1rem; font-weight:700; font-family:var(--head); letter-spacing:.5px;}
+  .result-head{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;}
+  .pl{font-size:1.1rem; font-weight:600; font-family:var(--mono);}
+  .pos{color:var(--green);} .neg{color:var(--red);}
+  table{width:100%; border-collapse:collapse; font-size:.82rem; margin-top:8px; font-family:var(--mono);}
+  th,td{padding:5px 7px; text-align:right; border-bottom:1px solid #1e1e1e;}
+  th{color:var(--muted); font-weight:600; font-family:var(--data); text-transform:uppercase; font-size:.7rem;
+    letter-spacing:.5px; border-bottom:2px solid var(--red);}
+  td:first-child,th:first-child{text-align:left;}
+  .greeks{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-top:10px;}
+  .greek{background:var(--panel2); border-radius:6px; padding:8px; text-align:center;
+    border-top:2px solid var(--red);}
+  .greek .v{font-weight:700; font-size:.95rem; font-family:var(--mono);}
+  .greek .k{color:var(--muted); font-size:.7rem;}
+  .matrix td.center{background:rgba(253,0,0,.28); font-weight:700;}
+  #payoff{width:100%; background:#0a0a0a; border-radius:8px; border:1px solid #1e1e1e;}
+  .hint{font-size:.72rem; color:var(--muted); margin-top:4px;}
+  .warn{font-size:.75rem; color:var(--gold); margin-top:10px; line-height:1.4;}
+  .slider-row{display:flex; align-items:center; gap:10px;}
+  .slider-row input[type=range]{flex:1; padding:0;}
+  .slider-row span{min-width:52px; text-align:right; font-size:.85rem;}
+  #chainWrap{max-height:220px; overflow-y:auto; margin-top:6px; display:none;}
+  #chainWrap tr{cursor:pointer;}
+  #chainWrap tr:hover td{background:rgba(88,166,255,.08);}
+  #drop,.dropz{border:1px dashed var(--border); border-radius:8px; padding:18px; text-align:center;
+    color:var(--muted); font-size:.85rem; cursor:pointer;}
+  #drop.over,.dropz.over{border-color:var(--accent); color:var(--accent); background:rgba(253,0,0,.08);}
+  .verdict{border-left:4px solid var(--red); border-radius:8px; padding:10px 12px; background:var(--panel2);
+    font-size:.88rem; line-height:1.55;}
+  .verdict.smart{border-left-color:var(--green);}
+  .verdict.meh{border-left-color:var(--gold);}
+  tr.pickable{cursor:pointer;}
+  tr.pickable:hover td{background:rgba(255,255,255,.07);}
+  tr.pickable td:first-child::after{content:" ↵"; color:#555; font-size:.7rem;}
+  .pickcard{cursor:pointer;}
+  .pickcard:hover{filter:brightness(1.12);}
+  tr.rv-good td{color:var(--green);}
+  tr.rv-deal td{color:var(--gold);}
+  tr.rv-bad  td{color:var(--red); opacity:.72;}
+  tr.rv-neutral td{color:#c9c9c9;}
+  .verdict h3{font-family:var(--head); text-transform:uppercase; letter-spacing:1px; font-size:.95rem; margin-bottom:6px;}
+  #posTbl tr{cursor:pointer;}
+  #posTbl tr:hover td{background:rgba(88,166,255,.08);}
+  #chatLog{max-height:300px; overflow-y:auto; margin-top:10px; display:flex; flex-direction:column; gap:8px;}
+  .msg{padding:8px 10px; border-radius:8px; font-size:.85rem; line-height:1.5; white-space:pre-wrap;}
+  .msg.u{background:var(--panel2); align-self:flex-end; max-width:85%;}
+  .msg.a{background:rgba(88,166,255,.08); border:1px solid var(--border);}
+  .diag{border:1px solid var(--border); border-left:4px solid var(--muted); border-radius:8px;
+    padding:10px 12px; margin-bottom:10px; font-size:.85rem; line-height:1.5;}
+  .diag h3{font-size:.9rem; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;}
+  .diag .badge{font-size:.72rem; padding:2px 8px; border-radius:10px; font-weight:700;}
+  .diag.healthy{border-left-color:var(--green);} .diag.healthy .badge{background:#1d3a26; color:var(--green);}
+  .diag.struggling{border-left-color:var(--gold);} .diag.struggling .badge{background:#3a331d; color:var(--gold);}
+  .diag.critical{border-left-color:#e8843a;} .diag.critical .badge{background:#3a2a1d; color:#e8843a;}
+  .diag.dead{border-left-color:var(--red);} .diag.dead .badge{background:#3a1d1d; color:var(--red);}
+  .diag ul{margin:4px 0 0 18px;}
+  .diag li{margin-bottom:2px;}
+  .diag .lbl{color:var(--muted); font-size:.75rem; margin-top:6px;}
+  /* ---------- Arcade ---------- */
+  .arcade-wrap{max-width:1250px; margin:28px auto 0;}
+  .arcade-marquee{display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:16px;
+    position:relative;}
+  .arcade-marquee h2{font-family:var(--head); font-weight:700; text-transform:uppercase; letter-spacing:4px;
+    font-size:1.6rem; margin:0; text-align:center;
+    background:linear-gradient(180deg,#fff 20%,#ffd54f 55%,#ff9800 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 18px rgba(255,193,7,.55));}
+  .arcade-marquee .bulb{width:8px; height:8px; border-radius:50%; background:var(--gold);
+    box-shadow:0 0 8px 2px rgba(255,179,0,.85); animation:bulbflicker 1.6s ease-in-out infinite;}
+  .arcade-marquee .bulb:nth-child(1){animation-delay:.1s;}
+  .arcade-marquee .bulb:nth-child(5){animation-delay:.4s;}
+  @keyframes bulbflicker{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .arcade-sub{text-align:center; color:#c4b3de; font-size:.82rem; margin:-8px 0 18px; letter-spacing:.5px;}
+  .cabinet-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+  @media(max-width:900px){.cabinet-grid{grid-template-columns:1fr;}}
+  .cabinet{position:relative; background:linear-gradient(180deg,#141414,#000 70%);
+    border:1px solid #2e2e2e; border-radius:14px; padding:0; overflow:hidden; cursor:pointer;
+    box-shadow:0 4px 18px rgba(0,0,0,.5); transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;}
+  .cabinet:hover{transform:translateY(-4px); border-color:var(--gold);
+    box-shadow:0 10px 30px rgba(0,0,0,.6), 0 0 24px rgba(255,179,0,.35);}
+  .cabinet .screen{height:120px; display:flex; align-items:center; justify-content:center;
+    font-family:var(--head); font-size:1.8rem; letter-spacing:2px; text-transform:uppercase;
+    position:relative; overflow:hidden;}
+  .cabinet .screen::after{content:""; position:absolute; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(180deg, rgba(0,0,0,.25) 0 2px, transparent 2px 4px);}
+  .cabinet.pacman .screen{background:radial-gradient(60% 90% at 50% 40%, #1a1a2e 0%, #05040f 100%); color:#ffe082;
+    text-shadow:0 0 14px rgba(255,224,130,.7);}
+  .cabinet.kong .screen{background:radial-gradient(60% 90% at 50% 40%, #2a1a05 0%, #05040f 100%); color:var(--red);
+    text-shadow:0 0 14px rgba(253,0,0,.7);}
+  .cabinet.asteroids .screen{background:radial-gradient(60% 90% at 50% 40%, #0a1a2a 0%, #05040f 100%); color:#00e5ff;
+    text-shadow:0 0 14px rgba(0,229,255,.7);}
+  .cabinet .info{padding:14px 16px 16px;}
+  .cabinet .info b{display:block; font-family:var(--head); text-transform:uppercase; letter-spacing:1px;
+    font-size:.95rem; color:#fff; margin-bottom:4px;}
+  .cabinet .info span{display:block; color:var(--muted); font-size:.78rem; margin-bottom:10px;}
+  .cabinet .coin{display:inline-flex; align-items:center; gap:6px; background:var(--red); color:#fff;
+    border:none; border-radius:6px; padding:7px 12px; font-family:var(--head); font-weight:700;
+    text-transform:uppercase; letter-spacing:1.5px; font-size:.75rem;}
+  .cabinet:hover .coin{filter:brightness(1.2);}
+  #arcadeOverlay{display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,.88);
+    align-items:center; justify-content:center; padding:20px;}
+  #arcadeOverlay.open{display:flex;}
+  .arcade-modal{position:relative; width:min(1100px,96vw); height:min(760px,90vh);
+    border:2px solid var(--gold); border-radius:14px; box-shadow:0 0 60px rgba(255,179,0,.35); overflow:hidden;
+    background:#000;}
+  .arcade-modal iframe{width:100%; height:100%; border:none; display:block;}
+  .arcade-close{position:absolute; top:8px; right:8px; z-index:2; background:var(--red); color:#fff; border:none;
+    border-radius:6px; padding:6px 12px; font-family:var(--head); font-weight:700; letter-spacing:1px;
+    text-transform:uppercase; font-size:.72rem; cursor:pointer;}
+  .arcade-close:hover{filter:brightness(1.2);}
+  /* ---------- Support / footer ---------- */
+  .site-footer{max-width:1250px; margin:36px auto 24px; padding:20px 18px 0; border-top:1px solid rgba(255,255,255,.12);}
+  .support-row{display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:14px; margin-bottom:18px;}
+  .support-btn{display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:8px;
+    font-family:var(--head); font-weight:700; text-transform:uppercase; letter-spacing:1px; font-size:.8rem;
+    text-decoration:none; transition:filter .12s ease, transform .12s ease;}
+  .support-btn:hover{filter:brightness(1.15); transform:translateY(-1px);}
+  .support-btn.kofi{background:linear-gradient(180deg,#ff6f91,#ff2f6f); color:#fff;
+    box-shadow:0 0 16px rgba(255,47,111,.4);}
+  .support-btn.broker{background:linear-gradient(180deg,#ffd54f,var(--gold)); color:#1a0f00;
+    box-shadow:0 0 16px rgba(255,179,0,.4);}
+  .disclaimer{color:#8a80a0; font-size:.72rem; line-height:1.6; text-align:center; max-width:820px;
+    margin:0 auto 24px; padding:0 12px;}
+  .disclaimer b{color:#a99bc4;}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas><div id="fxBanner"></div>
+<div class="topbar">
+  <div class="logo"><span class="blk">GAMESTOP</span><span class="red">CMD</span></div>
+  <div class="ticker" id="tickerTape"><div class="tick-track" id="tickTrack">
+    <span class="tick">Upload your positions CSV to see live prices…</span></div></div>
+  <div class="tag"><b>■</b> Power to the Players
+    <button id="sndBtn" title="Sound">🔊</button>
+  </div>
+</div>
+<div class="titlebar">
+  <svg class="eightball" viewBox="0 0 220 220" role="img" aria-label="Magic 8 ball reading SQUEEZE">
+    <defs>
+      <radialGradient id="ball" cx="38%" cy="28%" r="82%">
+        <stop offset="0%"  stop-color="#6e6e78"/>
+        <stop offset="18%" stop-color="#2f2f36"/>
+        <stop offset="46%" stop-color="#121216"/>
+        <stop offset="82%" stop-color="#050506"/>
+        <stop offset="100%" stop-color="#000"/>
+      </radialGradient>
+      <radialGradient id="gloss" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity=".62"/>
+        <stop offset="55%" stop-color="#ffffff" stop-opacity=".14"/>
+        <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="rim" cx="50%" cy="88%" r="60%">
+        <stop offset="0%" stop-color="#8a8a96" stop-opacity=".30"/>
+        <stop offset="100%" stop-color="#8a8a96" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="wellG" cx="50%" cy="40%" r="72%">
+        <stop offset="0%" stop-color="#111118"/><stop offset="70%" stop-color="#050508"/><stop offset="100%" stop-color="#000"/>
+      </radialGradient>
+      <linearGradient id="triG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"  stop-color="#5b7bff"/>
+        <stop offset="45%" stop-color="#1a3cf0"/>
+        <stop offset="100%" stop-color="#0a1fb8"/>
+      </linearGradient>
+      <filter id="triGlow" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="6" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="soft"><feGaussianBlur stdDeviation="5"/></filter>
+    </defs>
+    <ellipse cx="112" cy="207" rx="62" ry="9" fill="#000" opacity=".45" filter="url(#soft)"/>
+    <circle cx="110" cy="106" r="100" fill="url(#ball)"/>
+    <circle cx="110" cy="106" r="100" fill="url(#rim)"/>
+    <ellipse cx="74" cy="52" rx="40" ry="26" fill="url(#gloss)" transform="rotate(-24 74 52)"/>
+    <ellipse cx="160" cy="150" rx="26" ry="12" fill="#fff" opacity=".05" transform="rotate(-20 160 150)"/>
+    <circle cx="110" cy="112" r="56" fill="#0b0b0e"/>
+    <circle cx="110" cy="112" r="52" fill="#000" stroke="#1b1b22" stroke-width="2"/>
+    <circle cx="110" cy="112" r="46" fill="url(#wellG)"/>
+    <g filter="url(#triGlow)">
+      <polygon points="66,86 154,86 110,160" fill="url(#triG)"/>
+      <polygon points="66,86 154,86 110,160" fill="none" stroke="#89a6ff" stroke-opacity=".85" stroke-width="1.6"/>
+      <polygon points="76,92 144,92 110,150" fill="none" stroke="#ffffff" stroke-opacity=".18" stroke-width="1"/>
+    </g>
+    <text x="110" y="112" text-anchor="middle" font-family="Oswald,Arial Narrow,sans-serif"
+          font-size="19" letter-spacing="1.6" fill="#eaf0ff"
+          style="paint-order:stroke" stroke="#0a1fb8" stroke-width="2.2">SQUEEZE</text>
+    <ellipse cx="92" cy="76" rx="22" ry="9" fill="#fff" opacity=".10" transform="rotate(-18 92 76)"/>
+  </svg>
+  <div class="titletext">
+    <h1 id="h1Title">The Magic 8 Ball</h1>
+    <div class="sub" id="subTitle">Ask it what an option opens at. It answers in Black-Scholes.</div>
+    <div class="led" id="ledBar"></div>
+  </div>
+</div>
+<div class="grid">
+  <div class="col-left">
+
+    <div class="card" id="card-live">
+      <h2>1 · Live data (optional)</h2>
+      <div class="row">
+        <input id="ticker" placeholder="Ticker e.g. NVDA" style="text-transform:uppercase">
+        <button id="fetchBtn" style="margin-top:0; flex:0 0 90px;">Fetch</button>
+      </div>
+      <div id="status"></div>
+      <div id="expiryRow" style="display:none">
+        <label>Expiration</label>
+        <select id="expirySel"></select>
+        <label>Option chain (click a row to load strike + IV)</label>
+        <div id="chainWrap"><table id="chainTbl"></table></div>
+      </div>
+    </div>
+
+    <div class="card" id="card-inputs" style="margin-top:16px">
+      <h2>2 · Inputs</h2>
+      <label>Type</label>
+      <div class="toggle">
+        <div id="tCall" class="active call">CALL</div>
+        <div id="tPut" class="put">PUT</div>
+      </div>
+      <div class="row">
+        <div style="flex:2"><label>Strategy</label>
+          <select id="strategy">
+            <option value="single">Single leg (naked)</option>
+            <option value="bullcall">Bull call spread</option>
+            <option value="bearput">Bear put spread</option>
+            <option value="straddle">Long straddle</option>
+            <option value="strangle">Long strangle</option>
+            <option value="condor">Iron condor (short)</option>
+          </select>
+        </div>
+        <div id="widthWrap" style="display:none"><label>Wing width ($)</label>
+          <input id="wingW" type="number" step="0.5" value="1"></div>
+      </div>
+      <div class="row">
+        <div><label>Option bid ($)</label><input id="optBid" type="number" step="0.01" placeholder="e.g. 0.18"></div>
+        <div><label>Option ask ($)</label><input id="optAsk" type="number" step="0.01" placeholder="e.g. 0.19"></div>
+        <div><label>Strike ($)</label><input id="strike" type="number" step="0.5" placeholder="e.g. 4.5"></div>
+      </div>
+      <div class="row">
+        <div><label>Prev close / last ($)</label><input id="spotNow" type="number" step="0.01" placeholder="e.g. 148.20"></div>
+        <div><label>Expected open ($)</label><input id="spotOpen" type="number" step="0.01" placeholder="pre-mkt price"></div>
+      </div>
+      <div class="row">
+        <div><label title="What you actually paid per contract. Drives your real breakeven and P/L instead of the current market price.">Your cost per contract ($) ⓘ</label>
+          <input id="entryPx" type="number" step="0.01" placeholder="blank = use market"></div>
+        <div><label>Contracts</label><input id="qtyIn" type="number" step="1" value="1"></div>
+      </div>
+      <div class="hint">Fill your cost and the breakeven, P/L and payoff chart all use what you actually paid.</div>
+      <label>Expiration date</label>
+      <input id="expiry" type="date">
+      <label>Current implied volatility (%)</label>
+      <input id="iv" type="number" step="0.1" placeholder="e.g. 65">
+      <label style="display:flex; align-items:center; gap:6px; margin-top:12px;">
+        <input id="autoIv" type="checkbox" checked style="width:auto"> Auto-model IV from the price move
+      </label>
+      <div class="row" id="autoRow">
+        <div><label title="How much ALL option IVs inflate when the stock gaps. 0 = none, 1 = IV rises 1% per 1% gap, 1.5-2 = panicky meme name. Down-gaps get 1.3x extra.">Gap vol lift (×) ⓘ</label>
+          <input id="volBeta" type="number" step="0.1" value="1.0"></div>
+        <div><label title="Read-only: where the IV-vs-strike curve came from. 'skew fit, N strikes' = fitted from N real quotes (good). 'single quote' = only one IV known, so no skew slide — only the gap lift applies.">Skew source ⓘ</label>
+          <input id="skewSrc" readonly value="—" style="color:var(--muted)"></div>
+      </div>
+      <div class="hint">Two effects: (1) your strike SLIDES along the IV-vs-strike curve as the stock moves toward/away from it; (2) the whole curve LIFTS by gap size × the lift factor. Hover the ⓘ labels.</div>
+      <label>Manual / event adjustment (earnings, news)</label>
+      <div class="slider-row">
+        <input id="ivChg" type="range" min="-80" max="60" value="0" step="1">
+        <span id="ivChgLbl">0%</span>
+      </div>
+      <div class="hint">Applied on top of the model. Post-earnings IV crush is typically −20 to −50%.</div>
+      <div class="row">
+        <div><label title="How far the actual open may land from your expected price. Blank = derived from this option's own IV and the hours until the open.">Stock open uncertainty (±%) ⓘ</label><input id="spotUnc" type="number" step="0.1" placeholder="auto"></div>
+        <div><label>IV uncertainty (±% rel.)</label><input id="ivUnc" type="number" step="1" placeholder="10"></div>
+      </div>
+      <div class="hint">Leave blank and the app derives a realistic one-sigma overnight move from the option's own IV — ±0.5% on SPY, ±5% on a meme name. Override only if you have a reason.</div>
+      <div class="row">
+        <div><label>Risk-free rate (%)</label><input id="rate" type="number" step="0.05" value="4.25"></div>
+        <div><label>Dividend yield (%)</label><input id="divy" type="number" step="0.05" value="0"></div>
+      </div>
+      <button id="calcBtn" class="powerbtn">Calculate</button>
+    </div>
+  </div>
+  <div class="col-right">
+    <div class="card" id="results" style="display:none">
+      <h2>Predicted opening range</h2>
+      <div class="result-head">
+        <div class="big" id="openPrice">–</div>
+        <div class="pl" id="plLine"></div>
+      </div>
+      <div class="hint" id="tLine"></div>
+      <div class="greeks" id="greeks"></div>
+      <div id="calcDiag" style="margin-top:12px"></div>
+      <table id="attribution"></table>
+      <div class="warn">Estimates use Black-Scholes and assume your IV input. Actual opening quotes
+        include bid/ask spread, and pricing near expiry or deep ITM/OTM is less reliable.
+        This is a modeling tool, not financial advice.</div>
+    </div>
+    <div class="card" style="margin-top:16px; display:none" id="payoffCard">
+      <h2>P/L payoff diagram</h2>
+      <div class="greeks" id="payStats" style="grid-template-columns:repeat(4,1fr); margin:0 0 10px;"></div>
+      <canvas id="payoff" height="300"></canvas>
+      <div class="hint" id="payoffInfo" style="margin-top:6px">Hover the chart for exact P/L at any stock price.</div>
+      <table id="legsTbl"></table>
+    </div>
+
+    <div class="card" style="margin-top:16px; display:none" id="matrixCard">
+      <h2>Scenario matrix — option price by stock open × IV</h2>
+      <table class="matrix" id="matrix"></table>
+      <div class="hint">Rows: stock price at open. Columns: IV at open. Highlighted cell = your inputs.</div>
+    </div>
+
+    <div class="card" id="card-positions" style="margin-top:16px">
+      <h2>Positions — upload CSV</h2>
+      <div id="drop">Drop a CSV here, or click to browse
+        <input id="csvFile" type="file" accept=".csv,.txt" style="display:none">
+      </div>
+      <div id="csvStatus" class="hint"></div>
+      <div id="posWrap" style="display:none">
+        <div class="row" style="margin-top:10px">
+          <div><label>Underlying at open ($)</label><input id="posSpot" type="number" step="0.01"></div>
+          <div><label>Filter ticker</label><input id="posFilter" placeholder="blank = all"></div>
+          <div><label>IV change (%)</label><input id="posIvChg" type="number" step="5" value="0"></div>
+        </div>
+        <div class="row">
+          <button id="ivBtn" class="secondary">Fetch quotes + solve IV</button>
+          <button id="posCalc">Price positions at open</button>
+        </div>
+        <table id="posTbl"></table>
+        <div class="hint" id="posTotal"></div>
+        <button id="diagBtn" class="secondary">Run health check on all positions</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px; display:none" id="diagCard">
+      <h2>Position health check</h2>
+      <div class="hint" style="margin-bottom:8px">Triage order — worst first. Hover any number for the plain math.</div>
+      <div id="diagList"></div>
+    </div>
+
+    <div class="card" id="card-sanity" style="margin-top:16px">
+      <h2>🎮 Reality Check</h2>
+      <div class="row">
+        <div style="flex:2"><label>Ticker</label><input id="evalTicker" placeholder="e.g. CHWY" style="text-transform:uppercase"></div>
+        <div style="flex:2"><label>Expiration</label><select id="evalExpiry"><option value="">nearest</option></select></div>
+        <div style="flex:0 0 auto; display:flex; align-items:flex-end; gap:8px">
+          <button id="yahooChainBtn" style="margin:0; white-space:nowrap">Pull chain</button>
+          <button id="liveBtn" class="secondary" style="margin:0; white-space:nowrap">🔴 Go live</button>
+        </div>
+      </div>
+      <div class="hint" id="chainStatus">Enter a ticker and hit Pull chain — CBOE data via your local launcher.</div>
+      <div id="chainDrop" class="dropz" style="padding:10px; margin-top:8px; font-size:.78rem">…or drop a saved chain CSV here
+        <input id="chainFile" type="file" accept=".csv,.txt" style="display:none"></div>
+      <div class="row" style="margin-top:6px">
+        <button id="chainCsvBtn" class="secondary" style="display:none">⬇ Save chain as CSV</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div><label>Side</label>
+          <select id="evalSide"><option value="call">Call</option><option value="put">Put</option></select></div>
+        <div><label>Strike you're eyeing</label><input id="evalStrike" type="number" step="0.5"></div>
+        <div><label>Implied move (±%)</label><input id="evalMove" type="number" step="0.1" placeholder="auto"></div>
+      </div>
+      <div class="row">
+        <button id="evalBtn">🎮 Run reality check</button>
+        <button id="valueBtn" class="secondary">💰 Find the discounts</button>
+        <button id="moonBtn" class="secondary">🚀 Moonshots</button>
+        <button id="anomBtn" class="secondary">🔎 Anomalies</button>
+      </div>
+      <div id="evalOut" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card" id="card-chat" style="margin-top:16px">
+      <h2>Chat — local Ollama</h2>
+      <div id="fileWarn" style="display:none; background:#3a2a00; border:1px solid var(--gold); border-radius:6px;
+        padding:8px 10px; font-size:.8rem; color:var(--gold); margin-bottom:8px;">
+        You opened this page as a file — Ollama will refuse it.
+        <b>Use START_CALCULATOR.bat instead</b> (it opens this page at localhost, which Ollama accepts).
+      </div>
+      <div class="row">
+        <input id="ollamaUrl" value="http://localhost:11434" style="flex:2">
+        <select id="ollamaModel" style="flex:2"><option value="">connect…</option></select>
+        <button id="ollamaConn" style="margin-top:0; flex:0 0 90px">Connect</button>
+      </div>
+      <div id="ollamaStatus" class="hint"></div>
+      <div id="chatLog"></div>
+      <div class="row" style="margin-top:8px">
+        <input id="chatIn" placeholder="e.g. what happens to my puts if OPEN gaps to 3?" style="flex:4">
+        <button id="chatSend" style="margin-top:0; flex:0 0 80px">Send</button>
+      </div>
+      <div class="hint">The app does all pricing math and passes the numbers to the model as context, so a small local model can't get the arithmetic wrong.
+        It can also restyle the app — try "make the accent colour blue" or "hide the scenario matrix". Changes are saved.
+        <a href="#" id="resetUi" style="color:var(--red)">Reset appearance</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="arcade-wrap">
+  <div class="arcade-marquee">
+    <span class="bulb"></span><span class="bulb"></span>
+    <h2>🕹 The Arcade</h2>
+    <span class="bulb"></span><span class="bulb"></span>
+  </div>
+  <div class="arcade-sub">Insert coin. Diamond hands required.</div>
+  <div class="cabinet-grid">
+    <div class="cabinet pacman" data-src="gme_pacman.html">
+      <div class="screen">TENDIE<br>CHOMP</div>
+      <div class="info">
+        <b>Tendie Chomp</b>
+        <span>Chomp tendies, dodge the hedgies.</span>
+        <button class="coin">▶ Insert Coin</button>
+      </div>
+    </div>
+    <div class="cabinet kong" data-src="gme_kong.html">
+      <div class="screen">SQUEEZE<br>KONG</div>
+      <div class="info">
+        <b>Squeeze Kong</b>
+        <span>Climb the ladders, dodge the barrels, squeeze the shorts.</span>
+        <button class="coin">▶ Insert Coin</button>
+      </div>
+    </div>
+    <div class="cabinet asteroids" data-src="gme_asteroids.html">
+      <div class="screen">GME<br>ASTEROIDS</div>
+      <div class="info">
+        <b>GME Asteroids</b>
+        <span>Blast the FUD before it blasts your position.</span>
+        <button class="coin">▶ Insert Coin</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="arcadeOverlay">
+  <div class="arcade-modal">
+    <button class="arcade-close" id="arcadeClose">✕ Close</button>
+    <iframe id="arcadeFrame" src="" title="Arcade game"></iframe>
+  </div>
+</div>
+
+<div class="site-footer">
+  <div class="support-row">
+    <!-- TODO: replace YOUR_KOFI_USERNAME with your actual Ko-fi handle once created at ko-fi.com -->
+    <a class="support-btn kofi" href="https://ko-fi.com/YOUR_KOFI_USERNAME" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+    <!-- TODO: replace # with your actual broker referral/affiliate link -->
+    <a class="support-btn broker" href="#" target="_blank" rel="noopener">📈 Open a brokerage account</a>
+  </div>
+  <div class="disclaimer">
+    <b>Entertainment &amp; education only — not financial advice.</b> This tool models option pricing with
+    Black-Scholes and public market data; it does not predict the future and can be wrong. Nothing here is a
+    recommendation to buy or sell any security. Options trading involves substantial risk and isn't suitable
+    for every investor. Do your own research and consult a licensed financial advisor before trading.
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ---------- Arcade ---------- */
+(function(){
+  const overlay = document.getElementById('arcadeOverlay');
+  const frame = document.getElementById('arcadeFrame');
+  document.querySelectorAll('.cabinet').forEach(function(c){
+    c.addEventListener('click', function(){
+      frame.src = c.getAttribute('data-src');
+      overlay.classList.add('open');
+    });
+  });
+  document.getElementById('arcadeClose').addEventListener('click', function(){
+    overlay.classList.remove('open');
+    frame.src = '';
+  });
+  overlay.addEventListener('click', function(e){
+    if(e.target === overlay){ overlay.classList.remove('open'); frame.src=''; }
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && overlay.classList.contains('open')){
+      overlay.classList.remove('open'); frame.src='';
+    }
+  });
+})();
+/* ---------- Black-Scholes ---------- */
+function erfApprox(x){
+  const s = x>=0?1:-1; x=Math.abs(x);
+  const t = 1/(1+0.3275911*x);
+  const y = 1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y;
+}
+function N(x){ return 0.5*(1+erfApprox(x/Math.SQRT2)); }
+function pdf(x){ return Math.exp(-x*x/2)/Math.sqrt(2*Math.PI); }
+
+function bs(S,K,T,sigma,r,q,isCall){
+  if(T<=0 || sigma<=0){
+    const intr = isCall? Math.max(S-K,0) : Math.max(K-S,0);
+    return {price:intr, delta:isCall?(S>K?1:0):(S<K?-1:0), gamma:0, theta:0, vega:0, rho:0};
+  }
+  const sq=Math.sqrt(T);
+  const d1=(Math.log(S/K)+(r-q+sigma*sigma/2)*T)/(sigma*sq);
+  const d2=d1-sigma*sq;
+  const eq=Math.exp(-q*T), er=Math.exp(-r*T);
+  let price,delta,theta,rho;
+  const gamma=eq*pdf(d1)/(S*sigma*sq);
+  const vega=S*eq*pdf(d1)*sq/100; // per 1 IV point
+  if(isCall){
+    price=S*eq*N(d1)-K*er*N(d2);
+    delta=eq*N(d1);
+    theta=(-S*eq*pdf(d1)*sigma/(2*sq)-r*K*er*N(d2)+q*S*eq*N(d1))/365;
+    rho=K*T*er*N(d2)/100;
+  }else{
+    price=K*er*N(-d2)-S*eq*N(-d1);
+    delta=-eq*N(-d1);
+    theta=(-S*eq*pdf(d1)*sigma/(2*sq)+r*K*er*N(-d2)-q*S*eq*N(-d1))/365;
+    rho=-K*T*er*N(-d2)/100;
+  }
+  return {price,delta,gamma,theta,vega,rho};
+}
+
+/* ---------- time helpers (US market, ET) ---------- */
+function nextMarketOpen(){
+  // next 9:30 AM ET after now (skip weekends; holidays not handled)
+  const now = new Date();
+  const et = new Date(now.toLocaleString("en-US",{timeZone:"America/New_York"}));
+  const offset = now - et; // ms difference between local clock and ET rendering
+  let d = new Date(et);
+  const openToday = new Date(et); openToday.setHours(9,30,0,0);
+  if(et >= openToday) d.setDate(d.getDate()+1);
+  d.setHours(9,30,0,0);
+  while(d.getDay()===0 || d.getDay()===6) d.setDate(d.getDate()+1);
+  return new Date(d.getTime()+offset);
+}
+function expiryDateTime(dateStr){
+  // 4:00 PM ET on expiry date
+  const [y,m,day]=dateStr.split("-").map(Number);
+  const now=new Date();
+  const et=new Date(now.toLocaleString("en-US",{timeZone:"America/New_York"}));
+  const offset=now-et;
+  const d=new Date(y,m-1,day,16,0,0,0);
+  return new Date(d.getTime()+offset);
+}
+const YEAR_MS = 365*24*3600*1000;
+
+/* ---------- volatility skew model ---------- */
+// Fit IV as a function of log-moneyness ln(K/S) from whatever quotes we have.
+function fitSkew(ticker,expiry,isCall,S){
+  const pts=[];
+  if(chainData && chainData.ticker===ticker && chainData.res?.options?.[0]){
+    const list=isCall?chainData.res.options[0].calls:chainData.res.options[0].puts;
+    (list||[]).forEach(c=>{ if(c.impliedVolatility>0.01 && c.strike>0 && (c.bid>0||c.lastPrice>0))
+      pts.push([Math.log(c.strike/S), c.impliedVolatility]); });
+  }
+  if(pts.length<3){
+    positions.forEach(p=>{ if(p.ticker===ticker && p.expiry===expiry && p.iv && p.isCall===isCall)
+      pts.push([Math.log(p.strike/S), p.iv/100]); });
+  }
+  if(pts.length<3){
+    positions.forEach(p=>{ if(p.ticker===ticker && p.expiry===expiry && p.iv && p.isCall!==isCall)
+      pts.push([Math.log(p.strike/S), p.iv/100]); });
+  }
+  const uniq={}; pts.forEach(([m,v])=>{ uniq[m.toFixed(4)]=[m,v]; });
+  const P=Object.values(uniq).sort((a,b)=>a[0]-b[0]);
+  if(P.length<2) return null;
+  const ms=P.map(p=>p[0]), vs=P.map(p=>p[1]);
+  const deg=P.length>=3?2:1;
+  // least squares polynomial fit
+  const A=[], b=[];
+  for(let i=0;i<P.length;i++){ const row=[]; for(let d=deg;d>=0;d--) row.push(Math.pow(ms[i],d)); A.push(row); b.push(vs[i]); }
+  const n=deg+1, ATA=Array.from({length:n},()=>new Array(n).fill(0)), ATb=new Array(n).fill(0);
+  for(let i=0;i<A.length;i++) for(let j=0;j<n;j++){ ATb[j]+=A[i][j]*b[i]; for(let k=0;k<n;k++) ATA[j][k]+=A[i][j]*A[i][k]; }
+  for(let i=0;i<n;i++){ let piv=i;
+    for(let r=i+1;r<n;r++) if(Math.abs(ATA[r][i])>Math.abs(ATA[piv][i])) piv=r;
+    if(Math.abs(ATA[piv][i])<1e-12) return null;
+    [ATA[i],ATA[piv]]=[ATA[piv],ATA[i]]; [ATb[i],ATb[piv]]=[ATb[piv],ATb[i]];
+    for(let r=0;r<n;r++){ if(r===i) continue; const f=ATA[r][i]/ATA[i][i];
+      for(let cc=i;cc<n;cc++) ATA[r][cc]-=f*ATA[i][cc]; ATb[r]-=f*ATb[i]; }
+  }
+  const coef=ATb.map((v,i)=>v/ATA[i][i]);
+  const lo=Math.min(...ms)-0.05, hi=Math.max(...ms)+0.05;
+  return {
+    n:P.length,
+    at(m){ const mm=Math.max(lo,Math.min(hi,m));
+      let y=0; for(let i=0;i<coef.length;i++) y+=coef[i]*Math.pow(mm,coef.length-1-i);
+      return Math.max(y,0.03); }
+  };
+}
+// Model IV at the open: slide along the skew, then lift the surface for the gap size.
+function modelIV(ticker,expiry,isCall,K,S0,S1,ivNow,beta){
+  const gap=(S1-S0)/S0;
+  const sk=fitSkew(ticker,expiry,isCall,S0);
+  let base=ivNow, src="single quote (no skew available)";
+  if(sk){
+    const anchor=sk.at(Math.log(K/S0));      // what the fit says the strike is worth now
+    const moved =sk.at(Math.log(K/S1));      // ...and after the stock moves
+    if(anchor>0.01){ base=ivNow*(moved/anchor); src=`skew fit, ${sk.n} strikes`; }
+  }
+  // down-gaps lift vol more than up-gaps (leverage effect)
+  const lift=beta*Math.abs(gap)*(gap<0?1.3:1.0);
+  const out=Math.max(base*(1+lift),0.03);
+  return {iv:out, skewIV:base, gap, lift, src,
+    clamped:Math.max(Math.min(out,ivNow*4),ivNow*0.25)};
+}
+
+/* ---------- reactive gold LED under the calculator ---------- */
+let ledTimer=null;
+function led(state,holdMs){
+  const el=$("ledBar"); if(!el||!el.classList) return;
+  clearTimeout(ledTimer);
+  el.classList.remove("calc","good","bad");
+  if(state) el.classList.add(state);
+  if(state&&state!=="calc") ledTimer=setTimeout(()=>el.classList.remove("good","bad"),holdMs||4000);
+}
+
+/* ---------- UI state ---------- */
+let isCall = true;
+const $=id=>document.getElementById(id);
+$("tCall").onclick=()=>{isCall=true; $("tCall").classList.add("active"); $("tPut").classList.remove("active"); renderChain();};
+$("tPut").onclick=()=>{isCall=false; $("tPut").classList.add("active"); $("tCall").classList.remove("active"); renderChain();};
+$("ivChg").oninput=()=>{$("ivChgLbl").textContent=$("ivChg").value+"%";};
+$("ticker").addEventListener("change",()=>{
+  const S=underlyings[$("ticker").value.trim().toUpperCase()];
+  if(S!=null){ if(!$("spotNow").value) $("spotNow").value=S;
+    if(!$("spotOpen").value) $("spotOpen").value=S; }
+});
+
+/* ---------- live data via Yahoo Finance (CORS proxies) ---------- */
+// When launched via START_CALCULATOR.bat the local server proxies data for us —
+// that path has no CORS and works with the market closed. Public proxies are the fallback.
+const LOCAL_PROXY = (location.protocol==="http:" && /^(localhost|127\.0\.0\.1)$/.test(location.hostname))
+  ? (u=>location.origin+"/fetch?url="+encodeURIComponent(u)) : null;
+const PROXIES=[
+  ...(LOCAL_PROXY?[LOCAL_PROXY]:[]),
+  u=>"https://corsproxy.io/?url="+encodeURIComponent(u),
+  u=>"https://api.allorigins.win/raw?url="+encodeURIComponent(u),
+  u=>"https://api.codetabs.com/v1/proxy?quest="+encodeURIComponent(u),
+];
+async function proxied(url){
+  let lastErr;
+  for(const p of PROXIES){
+    try{
+      const r=await fetch(p(url),{signal:AbortSignal.timeout(9000)});
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      const j=await r.json();
+      if(j) return j;
+    }catch(e){ lastErr=e; }
+  }
+  throw lastErr||new Error("all proxies failed");
+}
+let chainData=null;
+
+function setStatus(msg,cls){ const s=$("status"); s.textContent=msg; s.className=cls||""; }
+
+$("fetchBtn").onclick=async()=>{
+  const tk=$("ticker").value.trim().toUpperCase();
+  if(!tk){ setStatus("Enter a ticker first.","err"); return; }
+  setStatus("Fetching quote…");
+  try{
+    const q=await proxied(`https://query1.finance.yahoo.com/v8/finance/chart/${tk}?interval=1d&range=1d&includePrePost=true`);
+    const meta=q?.chart?.result?.[0]?.meta;
+    if(!meta) throw new Error("no quote data");
+    const last=meta.regularMarketPrice;
+    // pre/post market price if available
+    const pp = meta.postMarketPrice ?? meta.preMarketPrice ?? null;
+    if(last){ $("spotNow").value=(+last).toFixed(2); }
+    $("spotOpen").value=((pp??last)).toFixed(2);
+    setStatus(`Quote: $${(+last).toFixed(2)}${pp?`  ·  pre/post: $${(+pp).toFixed(2)}`:""}\nFetching option chain…`,"ok");
+  }catch(e){
+    failMsg($("status"),"⚠ Quote fetch failed ("+e.message+"). Enter prices manually.",$("card-live"));
+    return;
+  }
+  try{
+    const oc=await proxied(`https://query2.finance.yahoo.com/v7/finance/options/${tk}`);
+    const res=oc?.optionChain?.result?.[0];
+    if(!res || !res.expirationDates?.length) throw new Error("no chain");
+    chainData={ticker:tk, res};
+    const sel=$("expirySel"); sel.innerHTML="";
+    res.expirationDates.forEach(ts=>{
+      const d=new Date(ts*1000);
+      const iso=d.toISOString().slice(0,10);
+      const o=document.createElement("option"); o.value=ts; o.textContent=iso; sel.appendChild(o);
+    });
+    $("expiryRow").style.display="block";
+    sel.onchange=loadExpiry;
+    await loadExpiry();
+    setStatus("Live data loaded. Click a chain row to fill strike + IV.","ok");
+  }catch(e){
+    setStatus("Quote loaded, but option chain unavailable ("+e.message+"). Enter strike/IV manually.","err");
+  }
+};
+
+async function loadExpiry(){
+  if(!chainData) return;
+  const ts=$("expirySel").value;
+  const d=new Date(ts*1000).toISOString().slice(0,10);
+  $("expiry").value=d;
+  try{
+    const oc=await proxied(`https://query2.finance.yahoo.com/v7/finance/options/${chainData.ticker}?date=${ts}`);
+    const res=oc?.optionChain?.result?.[0];
+    chainData.res=res;
+    renderChain();
+  }catch(e){ setStatus("Chain load failed for that expiry: "+e.message,"err"); }
+}
+
+function renderChain(){
+  if(!chainData?.res?.options?.[0]) return;
+  const opts=chainData.res.options[0];
+  const list=isCall? opts.calls : opts.puts;
+  if(!list){ return; }
+  const spot=parseFloat($("spotNow").value)||chainData.res.quote?.regularMarketPrice||0;
+  const tbl=$("chainTbl");
+  tbl.innerHTML="<tr><th>Strike</th><th>Last</th><th>Bid</th><th>Ask</th><th>IV%</th></tr>";
+  list.forEach(c=>{
+    const tr=document.createElement("tr");
+    const iv=c.impliedVolatility? (c.impliedVolatility*100).toFixed(1) : "–";
+    tr.innerHTML=`<td>${c.strike}</td><td>${c.lastPrice??"–"}</td><td>${c.bid??"–"}</td><td>${c.ask??"–"}</td><td>${iv}</td>`;
+    tr.onclick=()=>{
+      $("strike").value=c.strike;
+      if(c.impliedVolatility) $("iv").value=(c.impliedVolatility*100).toFixed(1);
+      if(c.bid) $("optBid").value=(+c.bid).toFixed(2);
+      if(c.ask) $("optAsk").value=(+c.ask).toFixed(2);
+      setStatus(`Loaded ${chainData.ticker} ${$("expiry").value} ${c.strike} ${isCall?"C":"P"}`,"ok");
+    };
+    if(spot && Math.abs(c.strike-spot)/spot<0.005) tr.style.background="rgba(210,153,34,.12)";
+    tbl.appendChild(tr);
+  });
+  $("chainWrap").style.display="block";
+}
+
+/* ---------- calculate ---------- */
+$("calcBtn").onclick=()=>{
+  led("calc");
+  const K=parseFloat($("strike").value);
+  const S1=parseFloat($("spotOpen").value);
+  const S0=parseFloat($("spotNow").value)||S1;
+  const ivNow=parseFloat($("iv").value)/100;
+  const expStr=$("expiry").value;
+  if(!K||!S1||!ivNow||!expStr){ alert("Need strike, expected open price, IV, and expiration."); return; }
+  const r=(parseFloat($("rate").value)||0)/100;
+  const q=(parseFloat($("divy").value)||0)/100;
+  const ivChg=(parseFloat($("ivChg").value)||0)/100;
+  let ivOpen, ivNote="";
+  if($("autoIv").checked){
+    const m=modelIV($("ticker").value.trim().toUpperCase(),expStr,isCall,K,S0,S1,ivNow,
+                    parseFloat($("volBeta").value)||0);
+    ivOpen=Math.max(m.clamped*(1+ivChg),0.01);
+    $("skewSrc").value=m.src;
+    ivNote=`IV model: ${(ivNow*100).toFixed(0)}% → skew ${(m.skewIV*100).toFixed(0)}%`
+      +` → gap lift +${(m.lift*100).toFixed(0)}%`
+      +(ivChg?` → manual ${ivChg>0?"+":""}${(ivChg*100).toFixed(0)}%`:"")
+      +` → <b>${(ivOpen*100).toFixed(0)}%</b> (${m.src})`;
+  }else{
+    ivOpen=Math.max(ivNow*(1+ivChg),0.01);
+    $("skewSrc").value="manual";
+  }
+  const bid=parseFloat($("optBid").value)||null;
+  const ask=parseFloat($("optAsk").value)||null;
+  const optNow=(bid!=null&&ask!=null)? (bid+ask)/2 : (bid??ask);
+  const vUnc=((parseFloat($("ivUnc").value)||10))/100;
+
+  const gapPct=(S1-S0)/S0*100;
+  if(gapPct<-80||gapPct>500){        // -98% or +6x overnight = wrong ticker, not a trade
+    failMsg($("tLine"),`⚠ ${gapPct.toFixed(0)}% overnight ($${S0} → $${S1}) isn't a gap, it's two different tickers. `
+      +`Check "Prev close" and "Expected open".`,$("card-inputs"));
+    $("results").style.display="block";
+    $("openPrice").textContent="—"; $("plLine").textContent=""; $("calcDiag").innerHTML="";
+    led("bad"); return;
+  }
+  const open=nextMarketOpen();
+  const exp=expiryDateTime(expStr);
+  const T1=Math.max((exp-open)/YEAR_MS,0);
+  const T0=Math.max((exp-new Date())/YEAR_MS,0);
+  if(exp<=open){ alert("Expiration is before the next market open."); return; }
+
+  // One-sigma move to the open. Overnight is calendar-long but variance-light —
+  // markets are shut — so scale by trading days, not wall-clock, or SPY looks like a meme stock.
+  const gapHrs=Math.max((open-new Date())/3600000,0.25);
+  const gapTradingDays=Math.min(gapHrs/24,1)*0.45;        // a full overnight ~= 0.45 of a session
+  const autoUnc=Math.min(Math.max(ivNow*Math.sqrt(gapTradingDays/252),0.0005),0.10);
+  const uncTyped=$("spotUnc").value.trim()!=="";
+  const sUnc=uncTyped?((parseFloat($("spotUnc").value)||0)/100):autoUnc;
+
+  const now = bs(S0,K,T0,ivNow,r,q,isCall);
+  const at  = bs(S1,K,T1,ivOpen,r,q,isCall);
+
+  // Where it actually opens: percentile bands, not the worst corner of a box.
+  // sUnc is one sigma of the overnight move; z scales it to a confidence level.
+  const band=(z)=>{
+    const sLo=S1*Math.exp(-z*sUnc), sHi=S1*Math.exp(z*sUnc);
+    const a=bs(sLo,K,T1,ivOpen,r,q,isCall).price, b=bs(sHi,K,T1,ivOpen,r,q,isCall).price;
+    const ivDollars=Math.abs(at.vega)*(ivOpen*100*vUnc);   // vega is per 1 IV point
+    return [Math.max(Math.min(a,b)-ivDollars,0), Math.max(a,b)+ivDollars];
+  };
+  const [lo,hi]=band(0.674);      // middle 50% — the honest "it'll probably open here"
+  const [lo80,hi80]=band(1.282);  // middle 80% — the tail check
+  // carry the option's current relative spread forward to estimate opening quote
+  let quoteLine="";
+  if(bid!=null&&ask!=null&&optNow>0){
+    const relSpread=Math.max((ask-bid)/optNow, 0.02);
+    const halfW=Math.max(at.price*relSpread/2, 0.005);
+    const eb=Math.max(at.price-halfW,0), ea=at.price+halfW;
+    quoteLine=`Est. opening quote ≈ $${eb.toFixed(2)} × $${ea.toFixed(2)} (assumes current ${(relSpread*100).toFixed(0)}% spread holds; spreads are usually wider in the first minutes)`;
+  }
+
+  $("results").style.display="block";
+  $("matrixCard").style.display="block";
+  $("openPrice").innerHTML=`$${lo.toFixed(2)} – $${hi.toFixed(2)}<span style="font-size:1rem; color:var(--muted)"> · mid $${at.price.toFixed(2)}</span>`;
+  const uncNote=`<b>Most likely (50%)</b> $${lo.toFixed(2)}–$${hi.toFixed(2)} · <b>80% of the time</b> $${lo80.toFixed(2)}–$${hi80.toFixed(2)}. `
+    +`Based on a ±${(sUnc*100).toFixed(2)}% one-sigma move to the open `
+    +`(${uncTyped?"your setting":(ivNow*100).toFixed(0)+"% IV, "+((open-new Date())/3600000).toFixed(1)+"h away"}) plus ±${(vUnc*100).toFixed(0)}% IV.`;
+
+  const entry=parseFloat($("entryPx").value)||null;
+  const qtyN=Math.abs(parseInt($("qtyIn").value)||1);
+  const base = entry ?? optNow ?? now.price;
+  const diff=at.price-base, pct=base? (diff/base*100):0;
+  const baseLbl = entry!=null?"your cost":(optNow!=null?"current mid":"model price");
+  $("plLine").innerHTML=`<span class="${diff>=0?'pos':'neg'}">${diff>=0?"+":""}${diff.toFixed(2)} (${pct>=0?"+":""}${pct.toFixed(1)}%) vs ${baseLbl} $${base.toFixed(2)}</span>`
+    +`<span style="color:var(--muted); font-size:.85rem; font-family:var(--data)"> · ${qtyN}× = `
+    +`<span class="${diff>=0?'pos':'neg'}">${diff>=0?"+":""}$${(diff*100*qtyN).toFixed(0)}</span>`
+    +(entry!=null&&optNow!=null?` · market now $${optNow.toFixed(2)}`:"")+`</span>`;
+
+  if(gapPct<-25)
+    ivNote+=`<br><span style="color:var(--gold)">That's a ${gapPct.toFixed(1)}% gap DOWN. Deliberate? If not, check "Expected open".</span>`;
+  const dte=((exp-open)/86400000).toFixed(1);
+  if(Math.abs(at.delta)>0.95)
+    ivNote+=`<br><span style="color:var(--gold)">Note: at $${S1.toFixed(2)} this contract is deep in the money (delta ${at.delta.toFixed(2)}, vega ${at.vega.toFixed(3)}) — IV barely moves its price now. It trades like ${Math.round(Math.abs(at.delta)*100)} shares of stock.</span>`;
+  else if(Math.abs(at.delta)<0.05)
+    ivNote+=`<br><span style="color:var(--gold)">Note: at $${S1.toFixed(2)} this contract is so far out of the money (delta ${at.delta.toFixed(2)}) that even ${(ivOpen*100).toFixed(0)}% IV leaves it nearly worthless.</span>`;
+  ivNote+=`<br><span style="color:var(--muted)">${uncNote}</span>`;
+  // explain a wide band when it is genuinely gamma, not model slop
+  const dteAtOpen=(exp-open)/86400000;
+  if(dteAtOpen<=1.2&&Math.abs(at.delta)>0.25&&Math.abs(at.delta)<0.75)
+    ivNote+=`<br><span style="color:var(--gold)">This is an at-the-money contract expiring same-day. `
+      +`A ${(sUnc*100).toFixed(2)}% move in the stock roughly doubles or halves it — the wide band is gamma, not model error. `
+      +`Deeper ITM/OTM strikes predict far tighter.</span>`;
+  $("tLine").innerHTML=`Next open: ${open.toLocaleString()} · ${dte} days to expiry at open · IV ${(ivNow*100).toFixed(1)}% → ${(ivOpen*100).toFixed(1)}%`
+    + (ivNote?`<br>${ivNote}`:"")
+    + (quoteLine?`<br>${quoteLine}`:"");
+
+  const g=$("greeks");
+  g.innerHTML="";
+  [["Δ Delta",at.delta.toFixed(3)],["Γ Gamma",at.gamma.toFixed(4)],["Θ Theta/day",at.theta.toFixed(3)],["ν Vega/1%",at.vega.toFixed(3)],["ρ Rho",at.rho.toFixed(3)]]
+    .forEach(([k,v])=>{ g.innerHTML+=`<div class="greek"><div class="v">${v}</div><div class="k">${k}</div></div>`; });
+
+  // attribution: decompose model move
+  const priceMove = bs(S1,K,T0,ivNow,r,q,isCall).price - now.price;
+  const thetaMove = bs(S0,K,T1,ivNow,r,q,isCall).price - now.price;
+  const ivMove    = bs(S0,K,T0,ivOpen,r,q,isCall).price - now.price;
+  const total=at.price-now.price;
+  const cross=total-priceMove-thetaMove-ivMove;
+  const fmt=x=>`<span class="${x>=0?'pos':'neg'}">${x>=0?"+":""}${x.toFixed(2)}</span>`;
+  $("attribution").innerHTML=`
+    <tr><th>Model move breakdown</th><th>$</th></tr>
+    <tr><td>Stock move ($${S0.toFixed(2)} → $${S1.toFixed(2)})</td><td>${fmt(priceMove)}</td></tr>
+    <tr><td>Time decay to open</td><td>${fmt(thetaMove)}</td></tr>
+    <tr><td>IV change (${(ivChg*100).toFixed(0)}%)</td><td>${fmt(ivMove)}</td></tr>
+    <tr><td>Interaction</td><td>${fmt(cross)}</td></tr>
+    <tr><td><b>Total (model)</b></td><td><b>${fmt(total)}</b></td></tr>`;
+
+  // scenario matrix
+  const spots=[-4,-2,-1,0,1,2,4].map(p=>S1*(1+p/100));
+  const ivs=[-40,-25,-10,0,10].map(p=>ivOpen*(1+p/100));
+  let html="<tr><th>Open ↓ / IV →</th>"+ivs.map(v=>`<th>${(v*100).toFixed(0)}%</th>`).join("")+"</tr>";
+  spots.forEach((s,si)=>{
+    html+=`<tr><td>$${s.toFixed(2)}</td>`;
+    ivs.forEach((v,vi)=>{
+      const p=bs(s,K,T1,v,r,q,isCall).price;
+      const c=(si===3&&vi===3)?' class="center"':"";
+      html+=`<td${c}>${p.toFixed(2)}</td>`;
+    });
+    html+="</tr>";
+  });
+  $("matrix").innerHTML=html;
+  lastCalc={ticker:$("ticker").value||"?", isCall, K, S0, S1, ivNow, ivOpen, T1,
+    mid:at.price, lo, hi, bid, ask, expiry:expStr, greeks:at};
+
+  // health check of this contract AS OF the predicted open
+  const tk=$("ticker").value.trim().toUpperCase()||"?";
+  const estHalf=(bid!=null&&ask!=null&&optNow>0)?Math.max(at.price*Math.max((ask-bid)/optNow,0.02)/2,0.005):at.price*0.05;
+  const pseudo={ticker:tk, expiry:expStr, strike:K, isCall, qty:qtyN, spot:S1, asOf:open,
+    mid:at.price, bid:Math.max(at.price-estHalf,0), ask:at.price+estHalf,
+    iv:ivOpen*100, basis:base!=null?base*100*qtyN:null};
+  const D=diagnose(pseudo);
+  led(D.score==null?null:(D.verdict==="healthy"?"good":D.verdict==="struggling"?null:"bad"),5000);
+  $("calcDiag").innerHTML=D.score!=null?
+    `<div class="lbl" style="color:var(--muted); font-size:.75rem; margin-bottom:4px">HEALTH CHECK — as of the open, at $${S1.toFixed(2)}</div>
+     <div class="diag ${D.verdict==="unknown"?"struggling":D.verdict}" style="margin-bottom:0">${buildDiagHTML(D)}</div>`:"";
+  // 💎 = high probability or long-dated hold
+  if(D.score!=null&&(D.prob_itm_pct>=60||D.dte>30))
+    $("openPrice").innerHTML+=` <span title="High probability or long-term hold">💎</span>`;
+
+  // strategy payoff diagram
+  const strat=$("strategy").value, w=parseFloat($("wingW").value)||1;
+  const legs=buildLegs(strat,K,w,isCall);
+  const sk0=fitSkew($("ticker").value.trim().toUpperCase(),expStr,isCall,S0);
+  const legIvNow=l=>{
+    if(sk0){ const a=sk0.at(Math.log(K/S0)); if(a>0.01) return Math.max(ivNow*sk0.at(Math.log(l.K/S0))/a,0.03); }
+    return ivNow;
+  };
+  const legIvOpen=l=>{
+    if(!$("autoIv").checked) return Math.max(legIvNow(l)*(1+ivChg),0.03);
+    return modelIV($("ticker").value.trim().toUpperCase(),expStr,l.call,l.K,S0,S1,legIvNow(l),
+      parseFloat($("volBeta").value)||0).clamped*(1+ivChg);
+  };
+  let cost=0;
+  legs.forEach(l=>{ cost+=l.sign*bs(S0,l.K,T0,legIvNow(l),r,q,l.call).price; });
+  if(strat==="single") cost = entry ?? optNow ?? cost;   // your actual entry drives the breakeven
+  $("payoffCard").style.display="block";
+  const atmIvOpen=(sk0&&sk0.at(0)>0.01)?
+    modelIV($("ticker").value.trim().toUpperCase(),expStr,isCall,S0,S0,S1,
+      Math.max(ivNow*sk0.at(0)/Math.max(sk0.at(Math.log(K/S0)),0.01),0.03),
+      parseFloat($("volBeta").value)||0).clamped
+    : ivOpen;
+  const meta=drawPayoff({legs,S0,S1,T1,r,q,ivOpenFn:legIvOpen,cost,atmIv:atmIvOpen});
+  // stats tiles
+  const rr=meta.maxProfit===Infinity?"∞":(Math.abs(meta.maxLoss)>0?(meta.maxProfit/Math.abs(meta.maxLoss)).toFixed(1):"—");
+  let nd=0,nt=0,nv=0,ng=0;
+  legs.forEach(l=>{ const gk=bs(S1,l.K,T1,legIvOpen(l),r,q,l.call);
+    nd+=l.sign*gk.delta; nt+=l.sign*gk.theta; nv+=l.sign*gk.vega; ng+=l.sign*gk.gamma; });
+  $("payStats").innerHTML=[
+    [entry!=null&&strat==="single"?"your cost":`net ${cost>=0?"debit":"credit"}`, `$${Math.abs(cost*100).toFixed(0)}`],
+    [`max profit ${meta.icon}`, meta.maxProfit===Infinity?"unbounded":"+$"+meta.maxProfit.toFixed(0)],
+    ["max loss", "-$"+Math.abs(meta.maxLoss).toFixed(0)],
+    ["risk : reward", "1 : "+rr],
+    ["prob. of profit", (meta.pop*100).toFixed(0)+"%"+(meta.pop>=0.6?" 💎":"")],
+    ["breakeven"+(meta.BEs.length>1?"s":""), meta.BEs.length?meta.BEs.map(b=>"$"+b.toFixed(2)).join(" / "):"—"],
+    ["±1σ range by expiry", `$${meta.expMoveLo.toFixed(2)}–$${meta.expMoveHi.toFixed(2)}`],
+    ["net Δ / Θ day", `${(nd*100).toFixed(0)} / ${(nt*100).toFixed(0)}`],
+  ].map(([k,v])=>`<div class="greek"><div class="v" style="font-size:.85rem">${v}</div><div class="k">${k}</div></div>`).join("");
+  // legs table
+  const lt=$("legsTbl");
+  lt.innerHTML="<tr><th>Leg</th><th>Strike</th><th>IV now</th><th>IV open</th><th>Px now</th><th>Px open</th></tr>"
+    +legs.map(l=>{
+      const ivN=legIvNow(l), ivO=legIvOpen(l);
+      const pN=bs(S0,l.K,T0,ivN,r,q,l.call).price, pO=bs(S1,l.K,T1,ivO,r,q,l.call).price;
+      return `<tr><td style="color:${l.sign>0?"var(--green)":"var(--red)"}">${l.sign>0?"BUY":"SELL"} ${l.call?"CALL":"PUT"}</td>`
+        +`<td>$${l.K}</td><td>${(ivN*100).toFixed(0)}%</td><td>${(ivO*100).toFixed(0)}%</td>`
+        +`<td>${pN.toFixed(3)}</td><td>${pO.toFixed(3)}</td></tr>`;
+    }).join("");
+  if(meta.icon==="🪨") setTimeout(()=>SFX.thud(),240);   // boulder lands
+  // 🎉 the whole point of the app
+  const plPct=base?((at.price-base)/base*100):0;
+  if(gapPct>=25||plPct>=100){
+    const banner = plPct>=1000 ? `${plPct.toFixed(0)}% — TENDIES SECURED`
+                 : plPct>=100  ? `+${plPct.toFixed(0)}% on the contract`
+                 : `${gapPct.toFixed(0)}% GAP UP`;
+    celebrate(banner, gapPct>0);
+  }
+  const stratName=$("strategy").selectedOptions[0].textContent;
+  $("payoffInfo").innerHTML=`<b>${stratName}</b> — red = at expiry · white dashed = at the open · gold dotted = halfway to expiry. `
+    +`Shaded band = where the market expects the stock by expiry (±1σ). Hover for P/L at any price + odds.`;
+};
+
+/* ================= strategy legs + payoff chart ================= */
+$("strategy").onchange=()=>{
+  $("widthWrap").style.display=["bullcall","bearput","strangle","condor"].includes($("strategy").value)?"block":"none";
+};
+function buildLegs(strat,K,w,isC){
+  switch(strat){
+    case "bullcall": return [{K,call:true,sign:1},{K:K+w,call:true,sign:-1}];
+    case "bearput":  return [{K,call:false,sign:1},{K:K-w,call:false,sign:-1}];
+    case "straddle": return [{K,call:true,sign:1},{K,call:false,sign:1}];
+    case "strangle": return [{K:K+w,call:true,sign:1},{K:K-w,call:false,sign:1}];
+    case "condor":   return [{K:K-2*w,call:false,sign:1},{K:K-w,call:false,sign:-1},
+                             {K:K+w,call:true,sign:-1},{K:K+2*w,call:true,sign:1}];
+    default:         return [{K,call:isC,sign:1}];
+  }
+}
+function drawPayoff(cfg){
+  const {legs,S0,S1,T1,r,q,ivOpenFn,cost,atmIv}=cfg;
+  const cv=$("payoff"), dpr=window.devicePixelRatio||1;
+  const W=cv.clientWidth||600, H=300;
+  cv.width=W*dpr; cv.height=H*dpr;
+  const ctx=cv.getContext("2d"); ctx.scale(dpr,dpr);
+  const ks=legs.map(l=>l.K);
+  const sig=Math.max(atmIv,0.05);
+  const band=Math.min(sig*Math.sqrt(T1),0.6);   // 1-sigma expected move by expiry
+  // range must cover the sigma band AND all breakevens (strikes +/- net premium)
+  const prem=Math.abs(cfg.cost)*1.6;
+  const xmin=Math.max(Math.min(Math.min(...ks)-prem, Math.min(S0,S1)*Math.max(1-1.8*band,0.55)),0.01),
+        xmax=Math.max(Math.max(...ks)+prem, Math.max(S0,S1)*Math.min(1+1.8*band,1.6));
+  const N_=181, xs=[], expiry=[], atOpen=[], half=[];
+  for(let i=0;i<N_;i++){
+    const s=xmin+(xmax-xmin)*i/(N_-1); xs.push(s);
+    let pe=0, po=0, ph=0;
+    legs.forEach(l=>{
+      const iv=ivOpenFn(l);
+      pe+=l.sign*(l.call?Math.max(s-l.K,0):Math.max(l.K-s,0));
+      po+=l.sign*bs(s,l.K,T1,iv,r,q,l.call).price;
+      ph+=l.sign*bs(s,l.K,T1/2,iv,r,q,l.call).price;
+    });
+    expiry.push((pe-cost)*100); atOpen.push((po-cost)*100); half.push((ph-cost)*100);
+  }
+  // probability S_T below x (lognormal from expected open, ATM iv)
+  const probBelow=x=>N((Math.log(x/S1)-(r-q-sig*sig/2)*T1)/(sig*Math.sqrt(T1)));
+  // breakevens on the expiry curve
+  const BEs=[];
+  for(let i=1;i<N_;i++) if((expiry[i-1]<0)!==(expiry[i]<0)){
+    const t=expiry[i-1]/(expiry[i-1]-expiry[i]);
+    BEs.push(xs[i-1]+(xs[i]-xs[i-1])*t);
+  }
+  // probability of profit: sum lognormal mass over profitable regions
+  let pop=0;
+  const bounds=[0,...BEs,Infinity];
+  for(let i=0;i<bounds.length-1;i++){
+    const lo=bounds[i], hi=bounds[i+1];
+    const mid=lo===0?Math.max(hi/2,1e-6):(hi===Infinity?lo*1.5:(lo+hi)/2);
+    const j=Math.max(0,Math.min(N_-1,Math.round((mid-xmin)/(xmax-xmin)*(N_-1))));
+    const profitable=(mid<=xmin?expiry[0]:mid>=xmax?expiry[N_-1]:expiry[j])>0;
+    if(profitable) pop+=(hi===Infinity?1:probBelow(hi))-(lo===0?0:probBelow(lo));
+  }
+  const ymin=Math.min(...expiry,...atOpen,...half), ymax=Math.max(...expiry,...atOpen,...half);
+  const pad=(ymax-ymin)*0.12||1, y0=ymin-pad, y1=ymax+pad;
+  const iMax=expiry.indexOf(Math.max(...expiry)), iMin=expiry.indexOf(Math.min(...expiry));
+  const openEnded=(iMax===N_-1&&legs.some(l=>l.call&&l.sign>0))||(iMax===0&&legs.some(l=>!l.call&&l.sign>0));
+  // icon by what the strategy actually roots for:
+  //   all puts -> boulder, all calls -> rocket, market-neutral -> bullseye, mixed -> net delta decides
+  let netD=0; legs.forEach(l=>{ netD+=l.sign*bs(S1,l.K,T1,ivOpenFn(l),r,q,l.call).delta; });
+  const interiorMax=iMax>2 && iMax<N_-3;
+  const ICON = legs.every(l=>!l.call) ? "🪨"
+             : legs.every(l=>l.call)  ? "🚀"
+             : (interiorMax && Math.abs(netD)<0.4) ? "🎯"
+             : (netD<0 ? "🪨" : "🚀");
+  const downside=ICON==="🪨";
+
+  const L=52, R=W-14, T_=18, B=H-26;
+  // boulder mode: mirror price axis (falling stock reads left->right) and invert P/L
+  // so the profit zone is downhill — the rock rolls INTO the money
+  const flip=downside;
+  const px=s=>{ const f=(s-xmin)/(xmax-xmin); return (flip?1-f:f)*(R-L)+L; };
+  const py=v=>{ const f=(v-y0)/(y1-y0); return flip? T_+f*(B-T_) : B-f*(B-T_); };
+  const rectX=(a,b)=>{ const x1=px(a),x2=px(b); return [Math.min(x1,x2),Math.abs(x2-x1)]; };
+  // starfield (seeded so it doesn't twinkle on every redraw)
+  let seed=Math.round(xmin*1000)+legs.length*77;
+  const rnd=()=>{ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; };
+  const stars=Array.from({length:70},()=>({x:L+rnd()*(R-L),y:T_+rnd()*(B-T_),r:rnd()*1.3+.3,a:rnd()*.5+.15}));
+  function render(hoverS){
+    ctx.clearRect(0,0,W,H);
+    const zy=Math.max(T_,Math.min(B,py(0)));
+    // profit / loss zones (profit is below the zero line in boulder mode)
+    ctx.fillStyle="rgba(0,200,83,.06)";
+    ctx.fillRect(L,flip?zy:T_,R-L,flip?Math.max(B-zy,0):Math.max(zy-T_,0));
+    ctx.fillStyle="rgba(253,0,0,.06)";
+    ctx.fillRect(L,flip?T_:zy,R-L,flip?Math.max(zy-T_,0):Math.max(B-zy,0));
+    // starfield
+    stars.forEach(s=>{ ctx.fillStyle=`rgba(255,255,255,${s.a})`;
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,7); ctx.fill(); });
+    // 1-sigma expected-move band around the expected open
+    const bLo=S1*Math.exp(-band), bHi=S1*Math.exp(band);
+    const [bx,bw]=rectX(Math.max(bLo,xmin),Math.min(bHi,xmax));
+    ctx.fillStyle="rgba(255,255,255,.05)"; ctx.fillRect(bx,T_,bw,B-T_);
+    ctx.fillStyle="#666"; ctx.font="10px Roboto Mono,monospace";
+    ctx.fillText("±1σ",bx+bw-24,T_+10);
+    // y gridlines
+    ctx.strokeStyle="#1c1c1c"; ctx.lineWidth=1; ctx.fillStyle="#777"; ctx.font="10px Roboto Mono,monospace";
+    for(let i=0;i<=4;i++){ const v=y0+(y1-y0)*i/4;
+      ctx.beginPath(); ctx.moveTo(L,py(v)); ctx.lineTo(R,py(v)); ctx.stroke();
+      ctx.fillText((v>=0?"+":"")+"$"+v.toFixed(0),4,py(v)+3); }
+    // zero line
+    ctx.strokeStyle="#3a3a3a"; ctx.beginPath(); ctx.moveTo(L,zy); ctx.lineTo(R,zy); ctx.stroke();
+    // x labels
+    ctx.fillStyle="#777";
+    for(let i=0;i<=5;i++){ const s=xmin+(xmax-xmin)*i/5; ctx.fillText("$"+s.toFixed(2),px(s)-16,H-8); }
+    // strikes
+    legs.forEach(l=>{ ctx.strokeStyle="#3a3a3a"; ctx.setLineDash([2,4]);
+      ctx.beginPath(); ctx.moveTo(px(l.K),T_); ctx.lineTo(px(l.K),B); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle="#666"; ctx.fillText("K "+l.K,px(l.K)-12,B-4); });
+    // now / open verticals
+    ctx.strokeStyle="#888"; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(px(S0),T_); ctx.lineTo(px(S0),B); ctx.stroke();
+    ctx.strokeStyle="#FD0000";
+    ctx.beginPath(); ctx.moveTo(px(S1),T_); ctx.lineTo(px(S1),B); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="#999"; ctx.fillText("now $"+S0.toFixed(2),px(S0)+3,T_+10);
+    ctx.fillStyle="#FD0000"; ctx.fillText("open $"+S1.toFixed(2),px(S1)+3,T_+22);
+    // halfway curve (gold dotted)
+    ctx.strokeStyle="rgba(255,179,0,.8)"; ctx.setLineDash([2,3]); ctx.lineWidth=1.3;
+    ctx.beginPath(); xs.forEach((s,i)=>i?ctx.lineTo(px(s),py(half[i])):ctx.moveTo(px(s),py(half[i]))); ctx.stroke();
+    // at-open curve (white dashed)
+    ctx.strokeStyle="rgba(255,255,255,.85)"; ctx.setLineDash([6,4]); ctx.lineWidth=1.6;
+    ctx.beginPath(); xs.forEach((s,i)=>i?ctx.lineTo(px(s),py(atOpen[i])):ctx.moveTo(px(s),py(atOpen[i]))); ctx.stroke();
+    ctx.setLineDash([]);
+    // expiry curve (red solid)
+    ctx.strokeStyle="#FD0000"; ctx.lineWidth=2.5;
+    ctx.beginPath(); xs.forEach((s,i)=>i?ctx.lineTo(px(s),py(expiry[i])):ctx.moveTo(px(s),py(expiry[i]))); ctx.stroke();
+    // legend
+    ctx.font="10px Roboto Mono,monospace";
+    ctx.fillStyle="#FD0000"; ctx.fillText("— expiry",R-170,T_+10);
+    ctx.fillStyle="#fff"; ctx.fillText("--- at open",R-108,T_+10);
+    ctx.fillStyle="#ffb300"; ctx.fillText("··· halfway",R-170,T_+22);
+    if(flip){ ctx.fillStyle="#00c853";
+      ctx.fillText("▼ downhill = profit (stock falling →)",L+4,B-16); }
+    // max markers (static rocket only when not hovering — it rides the cursor otherwise)
+    if(hoverS==null){
+      ctx.font="13px sans-serif"; ctx.fillStyle="#fff";
+      ctx.fillText(ICON,Math.min(px(xs[iMax]),R-30)-7,Math.max(py(expiry[iMax])-6,T_+12));
+    }
+    ctx.font="10px Roboto Mono,monospace"; ctx.fillStyle="#00c853";
+    ctx.fillText(openEnded?"unbounded":"max +$"+expiry[iMax].toFixed(0),Math.min(px(xs[iMax])+10,R-110),Math.max(py(expiry[iMax])+3,T_+22));
+    ctx.fillStyle="#FD0000";
+    ctx.fillText("max -$"+Math.abs(expiry[iMin]).toFixed(0),Math.min(px(xs[iMin])+6,R-110),Math.min(py(expiry[iMin])+12,B-6));
+    // breakevens
+    ctx.fillStyle="#fff";
+    BEs.forEach(bp=>{ ctx.beginPath(); ctx.arc(px(bp),zy,3.5,0,7); ctx.fill();
+      ctx.fillText("BE $"+bp.toFixed(2),px(bp)-26,zy-7); });
+    // crosshair — the rocket rides the expiry curve with your cursor
+    if(hoverS!=null){
+      const i=Math.max(0,Math.min(N_-1,Math.round((hoverS-xmin)/(xmax-xmin)*(N_-1))));
+      ctx.strokeStyle="rgba(255,255,255,.35)";
+      ctx.beginPath(); ctx.moveTo(px(hoverS),T_); ctx.lineTo(px(hoverS),B); ctx.stroke();
+      [["#fff",atOpen[i]],["#ffb300",half[i]]].forEach(([c,v])=>{
+        ctx.fillStyle=c; ctx.beginPath(); ctx.arc(px(hoverS),py(v),3.5,0,7); ctx.fill(); });
+      // rocket tilts with the slope; the boulder ROLLS as you drag across
+      const slope=i<N_-1?expiry[i+1]-expiry[i]:expiry[i]-expiry[i-1];
+      ctx.save();
+      ctx.translate(px(hoverS),py(expiry[i]));
+      ctx.rotate(downside? px(hoverS)/13 : (slope>=0?-0.4:2.1));
+      ctx.font=(downside?"17px":"15px")+" sans-serif";
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText(ICON,0,0);
+      ctx.restore();
+      ctx.textAlign="start"; ctx.textBaseline="alphabetic";
+      return i;
+    }
+    return null;
+  }
+  render(null);
+  cv.onmousemove=e=>{
+    const rect=cv.getBoundingClientRect();
+    const frac=(Math.min(Math.max(e.clientX-rect.left,L),R)-L)/(R-L);
+    const s=xmin+(flip?1-frac:frac)*(xmax-xmin);   // mirror the lookup too, or the rock runs backwards
+    const i=render(s);
+    if(i!=null){
+      const pb=probBelow(s);
+      $("payoffInfo").innerHTML=
+        `At <b>$${s.toFixed(2)}</b> — open: <b class="${atOpen[i]>=0?'pos':'neg'}">${atOpen[i]>=0?"+":""}$${atOpen[i].toFixed(0)}</b>`
+        +` · halfway: <b class="${half[i]>=0?'pos':'neg'}">${half[i]>=0?"+":""}$${half[i].toFixed(0)}</b>`
+        +` · expiry: <b class="${expiry[i]>=0?'pos':'neg'}">${expiry[i]>=0?"+":""}$${expiry[i].toFixed(0)}</b>`
+        +` &nbsp;|&nbsp; odds of finishing above: <b>${((1-pb)*100).toFixed(0)}%</b> · below: <b>${(pb*100).toFixed(0)}%</b>`;
+    }
+  };
+  cv.onmouseleave=()=>{ render(null); };
+  return {maxProfit:openEnded?Infinity:expiry[iMax], maxLoss:expiry[iMin], pop, BEs, icon:ICON,
+    expMoveLo:S1*Math.exp(-band), expMoveHi:S1*Math.exp(band)};
+}
+
+/* ================= CSV positions ================= */
+let positions=[];
+let lastCalc=null;
+
+function parseCSV(text){
+  const rows=[]; let row=[], cur="", inQ=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inQ){
+      if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else inQ=false; }
+      else cur+=c;
+    }else if(c==='"') inQ=true;
+    else if(c===','){ row.push(cur); cur=""; }
+    else if(c==='\n'||c==='\r'){
+      if(cur!==""||row.length){ row.push(cur); rows.push(row); row=[]; cur=""; }
+      if(c==='\r'&&text[i+1]==='\n') i++;
+    }else cur+=c;
+  }
+  if(cur!==""||row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(r=>r.some(c=>c.trim()!==""));
+}
+const MONTHS={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+function parseDateAny(s){
+  if(!s) return null;
+  s=s.trim();
+  let m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return `${m[1]}-${m[2]}-${m[3]}`;
+  m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if(m){ let y=+m[3]; if(y<100)y+=2000; return `${y}-${String(+m[1]).padStart(2,"0")}-${String(+m[2]).padStart(2,"0")}`; }
+  m=s.match(/([a-z]{3})[a-z]*\s+(\d{1,2})\s+(\d{4})/i);
+  if(m && MONTHS[m[1].toLowerCase()]) return `${m[3]}-${String(MONTHS[m[1].toLowerCase()]).padStart(2,"0")}-${String(+m[2]).padStart(2,"0")}`;
+  m=s.match(/(\d{1,2})\s+([a-z]{3})[a-z]*\s+(\d{2,4})/i);
+  if(m && MONTHS[m[2].toLowerCase()]){ let y=+m[3]; if(y<100)y+=2000;
+    return `${y}-${String(MONTHS[m[2].toLowerCase()]).padStart(2,"0")}-${String(+m[1]).padStart(2,"0")}`; }
+  return null;
+}
+// broker "strategy" strings e.g. "OPEN Long Call: 2 Aug 07 2026 4.5"  (number after colon = quantity)
+function parseStrategy(s){
+  if(!s) return null;
+  const m=s.match(/^\s*([A-Z.]{1,6})\s+(Long|Short)?\s*(Call|Put)s?\s*:?\s*(\d+)?\s+(.*?)\s+([\d.]+)\s*$/i);
+  if(!m) return null;
+  const exp=parseDateAny(m[5]);
+  if(!exp) return null;
+  return {ticker:m[1].toUpperCase(), isCall:/call/i.test(m[3]), strike:parseFloat(m[6]),
+          expiry:exp, sign:/short/i.test(m[2]||"")?-1:1, qtyHint:m[4]?parseInt(m[4]):null};
+}
+// "PLBY Long Stock: 13 Shares"
+function parseStockStrategy(s){
+  if(!s) return null;
+  const m=String(s).match(/^\s*([A-Z.]{1,6})\s+(Long|Short)\s+Stock\s*:/i);
+  return m?m[1].toUpperCase():null;
+}
+function num(v){ if(v==null) return null; const n=parseFloat(String(v).replace(/[$,%\s]/g,"")); return isNaN(n)?null:n; }
+
+// Fidelity option symbol: " -GME260807C22"  /  description: "GME AUG 07 2026 $22 CALL"
+function parseOccSymbol(s){
+  if(!s) return null;
+  const m=String(s).trim().replace(/^-/,"").match(/^([A-Z]{1,6})(\d{2})(\d{2})(\d{2})([CP])([\d.]+)$/i);
+  if(!m) return null;
+  return {ticker:m[1].toUpperCase(), expiry:`20${m[2]}-${m[3]}-${m[4]}`,
+          isCall:m[5].toUpperCase()==="C", strike:parseFloat(m[6]), sign:1};
+}
+function parseOptDescription(s){
+  if(!s) return null;
+  const m=String(s).trim().match(/^([A-Z.]{1,6})\s+([A-Z]{3})\s+(\d{1,2})\s+(\d{4})\s+\$?([\d.]+)\s+(CALL|PUT)/i);
+  if(!m || !MONTHS[m[2].toLowerCase()]) return null;
+  return {ticker:m[1].toUpperCase(),
+    expiry:`${m[4]}-${String(MONTHS[m[2].toLowerCase()]).padStart(2,"0")}-${String(+m[3]).padStart(2,"0")}`,
+    isCall:/call/i.test(m[6]), strike:parseFloat(m[5]), sign:1};
+}
+let underlyings={};   // ticker -> spot price
+
+function ingestCSV(text){
+  const rows=parseCSV(text);
+  if(rows.length<2){ $("csvStatus").textContent="Couldn't read that file."; return; }
+  const hdr=rows[0].map(h=>h.trim().toLowerCase());
+  const find=(...names)=>{ for(const n of names){ const i=hdr.findIndex(h=>h===n); if(i>=0) return i; }
+    for(const n of names){ const i=hdr.findIndex(h=>h.includes(n)); if(i>=0) return i; } return -1; };
+  const iSym=find("symbol"), iDesc=find("strategy","description","instrument","position"),
+        iTk=find("ticker","underlying","root"), iType=find("type","call/put","right","c/p"),
+        iK=find("strike"), iExp=find("expiration","expiry","exp date","exp"),
+        iQty=find("quantity","qty","contracts","net qty"), iBid=find("net bid","bid"),
+        iAsk=find("net ask","ask"), iLast=find("last price","mark","mid","last"),
+        iIV=find("iv mid","impl vol","iv","volatility"),
+        iBasis=find("cost basis total","basis","cost"), iAcct=find("account name","account"),
+        iUL=find("ul last","underlying last","ul price"),
+        iND=find("net delta"), iNG=find("net gamma"), iNT=find("net theta"),
+        iNV=find("net vega"), iTV=find("net time value","time value"),
+        iVal=find("value"), iAvg=find("$ avg cost","avg cost");
+  const typeCol=hdr.findIndex(h=>h==="type");  // Fidelity "Type" = Cash/Margin, not call/put
+  const isFidelityType = typeCol>=0 && rows.slice(1,8).some(r=>/^(cash|margin)$/i.test((r[typeCol]||"").trim()));
+  const out=[]; underlyings={};
+  for(let r=1;r<rows.length;r++){
+    const c=rows[r]; if(!c.length) continue;
+    const sym=iSym>=0?(c[iSym]||"").trim():"";
+    const desc=iDesc>=0?(c[iDesc]||"").trim():"";
+    if(/pending activity|money market|^\s*$/i.test(sym+desc) && !/call|put/i.test(desc)) {
+      // capture plain stock rows as underlying prices
+      const px=iLast>=0?num(c[iLast]):null;
+      if(sym && px && /^[A-Z.]{1,6}$/.test(sym) && !/spaxx/i.test(sym)) underlyings[sym.toUpperCase()]=px;
+      continue;
+    }
+    const ulLast=iUL>=0?num(c[iUL]):null;
+    const stockTk=parseStockStrategy(desc)||parseStockStrategy(sym);
+    if(stockTk){ if(ulLast) underlyings[stockTk]=ulLast; continue; }
+
+    let p=parseOccSymbol(sym) || parseOptDescription(desc) || parseStrategy(desc) || parseStrategy(sym);
+    if(!p && iK>=0 && iExp>=0){
+      const exp=parseDateAny(c[iExp]); const k=num(c[iK]);
+      if(exp&&k!=null) p={ticker:(iTk>=0?c[iTk]:sym||"?").trim().toUpperCase().split(/\s+/)[0],
+        isCall:/^c/i.test((!isFidelityType&&iType>=0?c[iType]:"").trim()), strike:k, expiry:exp, sign:1};
+    }
+    if(!p){
+      const px=iLast>=0?num(c[iLast]):null;
+      if(sym && px && /^[A-Z.]{1,6}$/.test(sym)) underlyings[sym.toUpperCase()]=px;
+      continue;
+    }
+    if(ulLast) underlyings[p.ticker]=ulLast;
+    let qty=iQty>=0?num(c[iQty]):null;
+    if(qty==null) qty=p.qtyHint??1;
+    const bid=iBid>=0?num(c[iBid]):null, ask=iAsk>=0?num(c[iAsk]):null;
+    let mid=iLast>=0?num(c[iLast]):null;
+    if(mid==null&&bid!=null&&ask!=null) mid=(bid+ask)/2;
+    let iv=iIV>=0?num(c[iIV]):null;
+    if(iv!=null&&iv<5) iv*=100;
+    const nq=Math.abs(qty)*(qty<0?-1:1)*p.sign;
+    out.push({...p, qty:nq, bid, ask, mid, iv,
+              basis:iBasis>=0?num(c[iBasis]):(iAvg>=0&&num(c[iAvg])!=null?num(c[iAvg])*100*Math.abs(nq):null),
+              acct:iAcct>=0?(c[iAcct]||"").trim():"", spot:ulLast,
+              netDelta:iND>=0?num(c[iND]):null, netGamma:iNG>=0?num(c[iNG]):null,
+              netTheta:iNT>=0?num(c[iNT]):null, netVega:iNV>=0?num(c[iNV]):null,
+              timeValue:iTV>=0?num(c[iTV]):null, value:iVal>=0?num(c[iVal]):null});
+  }
+  if(!out.length){ failMsg($("csvStatus"),"⚠ No option rows recognised in that file. It needs either a strategy/description column, or Strike + Expiration columns.",$("card-positions")); return; }
+  // merge duplicate contracts held across accounts
+  const merged={};
+  out.forEach(p=>{
+    const k=`${p.ticker}|${p.expiry}|${p.strike}|${p.isCall}`;
+    if(merged[k]){ const m=merged[k];
+      m.qty+=p.qty; m.basis=+(((m.basis||0)+(p.basis||0)).toFixed(2));
+      ["netDelta","netGamma","netTheta","netVega","timeValue","value"].forEach(f=>{
+        if(p[f]!=null) m[f]=+(((m[f]||0)+p[f]).toFixed(4)); });
+    } else merged[k]={...p};
+  });
+  positions=Object.values(merged).sort((a,b)=>a.ticker.localeCompare(b.ticker)||a.expiry.localeCompare(b.expiry)||a.strike-b.strike);
+  const dupes=out.length-positions.length;
+  const solved=solveAllIV();
+  $("csvStatus").innerHTML=`Loaded <b>${positions.length}</b> contracts from ${out.length} rows`
+    +(dupes?` (${dupes} merged across accounts)`:"")
+    +(solved?` · <span style="color:var(--green)">IV solved for ${solved} from prices in the file</span>`:"")
+    +(Object.keys(underlyings).length?`<br>Underlyings: ${Object.entries(underlyings).map(([k,v])=>k+" $"+v).join(", ")}`:"")
+    +(solved<positions.length?`<br>Click "Fetch quotes + solve IV" to look up the rest online.`:"");
+  $("posWrap").style.display="block";
+  if(!$("posSpot").value) $("posSpot").value=$("spotOpen").value||"";
+  renderPositions();
+  startTicker();
+}
+/* ---------- live ticker tape ---------- */
+let quoteChg={}, tickerTimer=null;
+function buildTicker(){
+  const t=$("tickTrack"); if(!t) return;
+  if(!positions.length){ t.innerHTML=`<span class="tick">Upload your positions CSV to see live prices…</span>`; return; }
+  const items=[];
+  // lead with each underlying's live stock price, then that ticker's contracts
+  const byTicker={};
+  positions.forEach(p=>{ (byTicker[p.ticker]=byTicker[p.ticker]||[]).push(p); });
+  Object.keys(byTicker).sort().forEach(tk=>{
+    const S=underlyings[tk], ch=quoteChg[tk];
+    const cls=ch==null?"":(ch>=0?"up":"dn");
+    const arr=ch==null?"":(ch>=0?"▲":"▼");
+    items.push(`<span class="tick stock"><b>${tk}</b>`
+      +`<span class="big-px">${S!=null?"$"+(+S).toFixed(2):"—"}</span>`
+      +(ch!=null?`<span class="${cls}">${arr} ${ch>=0?"+":""}${ch.toFixed(2)}%</span>`:"")
+      +`</span>`);
+    byTicker[tk].forEach(p=>{
+      const val=p.mid!=null?(p.mid*100*Math.abs(p.qty)).toFixed(0):null;
+      items.push(`<span class="tick"><span class="sep">└</span>${p.strike}${p.isCall?"C":"P"}`
+        +`<span class="sep">×${Math.abs(p.qty)}</span>`
+        +(p.mid!=null?`<span class="px">$${p.mid.toFixed(2)}</span><span class="val">$${val}</span>`:"")
+        +`</span>`);
+    });
+    items.push(`<span class="tick sep">|</span>`);
+  });
+  t.innerHTML=items.join("")+items.join("");    // duplicated for a seamless loop
+  t.style.animationDuration=Math.max(24,items.length*4.5)+"s";
+}
+async function refreshTickerQuotes(){
+  const tks=[...new Set(positions.map(p=>p.ticker))];
+  for(const s of tks){
+    try{
+      const j=await proxied(`https://query1.finance.yahoo.com/v8/finance/chart/${s}?interval=1d&range=1d&includePrePost=true`);
+      const m=j?.chart?.result?.[0]?.meta;
+      if(m?.regularMarketPrice){
+        const px=m.postMarketPrice??m.preMarketPrice??m.regularMarketPrice;
+        const prev=m.chartPreviousClose??m.previousClose??m.regularMarketPrice;
+        underlyings[s]=+px; quoteChg[s]=prev?((px-prev)/prev*100):null;
+      }
+    }catch(_){}
+  }
+  buildTicker();
+}
+function startTicker(){
+  buildTicker();
+  if(tickerTimer) clearInterval(tickerTimer);
+  refreshTickerQuotes();
+  tickerTimer=setInterval(refreshTickerQuotes,60000);
+}
+
+/* solve IV for every position we already have a spot price for — no network needed */
+function solveAllIV(){
+  const r=(parseFloat($("rate").value)||0)/100, q=(parseFloat($("divy").value)||0)/100;
+  const now=new Date(); let n=0;
+  positions.forEach(p=>{
+    if(p.iv) { n++; return; }
+    const S=p.spot??underlyings[p.ticker];
+    if(!S||p.mid==null) return;
+    p.spot=S;
+    const T=Math.max((expiryDateTime(p.expiry)-now)/YEAR_MS,0);
+    const iv=impliedVol(p.mid,S,p.strike,T,r,q,p.isCall);
+    if(iv){ p.iv=iv*100; n++;
+      // cross-check against broker's reported net delta
+      if(p.netDelta!=null && p.qty && Math.abs(p.netDelta)>0.01){
+        const modelNet=bs(S,p.strike,T,iv,r,q,p.isCall).delta*100*p.qty;
+        const rel=Math.abs(modelNet-p.netDelta)/Math.abs(p.netDelta);
+        p.deltaCheck={broker:p.netDelta, model:+modelNet.toFixed(2), rel, ok:rel<0.25};
+      }
+    }
+  });
+  return n;
+}
+
+/* implied vol by bisection from a market price */
+function impliedVol(mktPrice,S,K,T,r,q,isCall){
+  if(!(mktPrice>0)||T<=0) return null;
+  const intr=isCall?Math.max(S-K,0):Math.max(K-S,0);
+  if(mktPrice<=intr) return null;
+  let lo=0.01, hi=8;
+  if(bs(S,K,T,hi,r,q,isCall).price<mktPrice) return null;
+  for(let i=0;i<80;i++){
+    const mid=(lo+hi)/2;
+    if(bs(S,K,T,mid,r,q,isCall).price<mktPrice) lo=mid; else hi=mid;
+  }
+  return (lo+hi)/2;
+}
+async function fetchQuotesAndIV(){
+  const r=(parseFloat($("rate").value)||0)/100, q=(parseFloat($("divy").value)||0)/100;
+  const tickers=[...new Set(positions.map(p=>p.ticker))];
+  $("csvStatus").textContent="Fetching underlying quotes…";
+  for(const t of tickers){
+    if(underlyings[t]) continue;
+    try{
+      const j=await proxied(`https://query1.finance.yahoo.com/v8/finance/chart/${t}?interval=1d&range=1d&includePrePost=true`);
+      const m=j?.chart?.result?.[0]?.meta;
+      if(m?.regularMarketPrice) underlyings[t]=m.regularMarketPrice;
+    }catch(e){}
+  }
+  let solved=0, failed=[];
+  const now=new Date();
+  positions.forEach(p=>{
+    const S=underlyings[p.ticker];
+    if(!S||p.mid==null){ failed.push(p.ticker+" "+p.strike); return; }
+    const T=Math.max((expiryDateTime(p.expiry)-now)/YEAR_MS,0);
+    const iv=impliedVol(p.mid,S,p.strike,T,r,q,p.isCall);
+    if(iv){ p.iv=iv*100; p.spot=S; solved++; } else { p.spot=S; failed.push(`${p.ticker} ${p.strike}${p.isCall?"C":"P"}`); }
+  });
+  $("csvStatus").innerHTML=`Solved IV for ${solved}/${positions.length} contracts.`
+    +(failed.length?` <span style="color:var(--gold)">No IV (price at/below intrinsic or no quote): ${failed.join(", ")}</span>`:"");
+  renderPositions(); buildTicker();
+}
+$("ivBtn").onclick=fetchQuotesAndIV;
+function renderPositions(prices){
+  const f=$("posFilter").value.trim().toUpperCase();
+  const t=$("posTbl");
+  t.innerHTML="<tr><th>Contract</th><th>Qty</th><th>UL</th><th>IV%</th><th>Now</th><th>TV</th>"+(prices?"<th>At open</th><th>Value</th><th>P/L</th>":"")+"</tr>";
+  positions.forEach((p,i)=>{
+    if(f && p.ticker!==f) return;
+    const pr=prices?prices[i]:null;
+    const tr=document.createElement("tr");
+    const ivTxt=p.iv?p.iv.toFixed(0):"–";
+    const dc=p.deltaCheck;
+    const flag=dc&&!dc.ok?`<span style="color:var(--gold)" title="Broker net delta ${dc.broker} vs model ${dc.model} — ${(dc.rel*100).toFixed(0)}% apart. Price-implied IV still reproduces the quoted price, but Greeks for this contract are uncertain."> ⚠</span>`:"";
+    const chk=dc?` title="broker net delta ${dc.broker}, model ${dc.model}"`:"";
+    let h=`<td${chk}>${p.ticker} ${p.expiry.slice(5)} ${p.strike}${p.isCall?"C":"P"}${flag}</td>`
+        +`<td>${p.qty}</td><td>${p.spot?"$"+p.spot:"–"}</td><td>${ivTxt}</td>`
+        +`<td>${p.mid!=null?p.mid.toFixed(3):"–"}</td>`
+        +`<td>${p.timeValue!=null?"$"+p.timeValue.toFixed(0):"–"}</td>`;
+    if(pr){
+      const pl=pr.val-(p.basis??(p.mid!=null?p.mid*100*Math.abs(p.qty):0));
+      h+=`<td>${pr.price.toFixed(3)}</td><td>$${pr.val.toFixed(0)}</td>`
+        +`<td class="${pl>=0?'pos':'neg'}">${pl>=0?"+":""}$${pl.toFixed(0)}</td>`;
+    }
+    tr.innerHTML=h;
+    tr.onclick=()=>{
+      isCall=p.isCall;
+      $("tCall").classList.toggle("active",p.isCall); $("tPut").classList.toggle("active",!p.isCall);
+      $("strike").value=p.strike; $("expiry").value=p.expiry;
+      if(p.iv) $("iv").value=p.iv.toFixed(1);
+      if(p.bid!=null) $("optBid").value=p.bid; if(p.ask!=null) $("optAsk").value=p.ask;
+      if(p.qty) $("qtyIn").value=Math.abs(p.qty);
+      $("entryPx").value=(p.basis!=null&&p.qty)?(p.basis/Math.abs(p.qty)/100).toFixed(3):"";
+      const S=p.spot??underlyings[p.ticker];
+      if(S!=null) $("spotNow").value=S;
+      if($("posSpot").value) $("spotOpen").value=$("posSpot").value;
+      else if(!$("spotOpen").value && S!=null) $("spotOpen").value=S;
+      $("ticker").value=p.ticker;
+      $("csvStatus").textContent=`Loaded ${p.ticker} ${p.strike}${p.isCall?"C":"P"} into the calculator.`;
+    };
+    t.appendChild(tr);
+  });
+}
+function pricePositions(){
+  const S=parseFloat($("posSpot").value);
+  if(!S){ alert("Enter the underlying price at open."); return null; }
+  const chg=1+(parseFloat($("posIvChg").value)||0)/100;
+  const r=(parseFloat($("rate").value)||0)/100, q=(parseFloat($("divy").value)||0)/100;
+  const open=nextMarketOpen();
+  const f=$("posFilter").value.trim().toUpperCase();
+  const prices={}; let tot=0, totBasis=0, totNow=0;
+  const auto=$("autoIv").checked, beta=parseFloat($("volBeta").value)||0;
+  positions.forEach((p,i)=>{
+    if(f && p.ticker!==f) return;
+    const T=Math.max((expiryDateTime(p.expiry)-open)/YEAR_MS,0);
+    const iv0=(p.iv??60)/100;
+    const S0p=p.spot??underlyings[p.ticker]??S;
+    let iv=iv0;
+    if(auto){ iv=modelIV(p.ticker,p.expiry,p.isCall,p.strike,S0p,S,iv0,beta).clamped; }
+    iv=Math.max(iv*chg,0.01);
+    const price=bs(S,p.strike,T,iv,r,q,p.isCall).price;
+    const val=price*100*p.qty;
+    prices[i]={price,val}; tot+=val;
+    totBasis+=p.basis??((p.mid??0)*100*p.qty);
+    totNow+=(p.mid??0)*100*p.qty;
+  });
+  renderPositions(prices);
+  const pl=tot-totBasis;
+  $("posTotal").innerHTML=`Portfolio at open: <b>$${tot.toFixed(0)}</b> · basis $${totBasis.toFixed(0)} · `
+    +`<span class="${pl>=0?'pos':'neg'}">${pl>=0?"+":""}$${pl.toFixed(0)} (${totBasis?((pl/Math.abs(totBasis))*100).toFixed(0):"–"}%)</span>`
+    +` · current value $${totNow.toFixed(0)}`;
+  return {S, tot, totBasis, totNow, prices};
+}
+$("posCalc").onclick=()=>pricePositions();
+$("posFilter").oninput=()=>renderPositions();
+$("drop").onclick=()=>$("csvFile").click();
+$("csvFile").onchange=e=>{ const f=e.target.files[0]; if(f) f.text().then(ingestCSV); };
+["dragenter","dragover"].forEach(ev=>$("drop").addEventListener(ev,e=>{e.preventDefault();$("drop").classList.add("over");}));
+["dragleave","drop"].forEach(ev=>$("drop").addEventListener(ev,e=>{e.preventDefault();$("drop").classList.remove("over");}));
+$("drop").addEventListener("drop",e=>{ const f=e.dataTransfer.files[0]; if(f) f.text().then(ingestCSV); });
+
+/* ================= sanity check (trade evaluator) ================= */
+let uploadedChain=null;   // [{strike, call:{bid,ask,mid,iv,oi}, put:{...}}]
+
+function parseChainCSV(text){
+  const rows=parseCSV(text);
+  let hi=-1;
+  for(let i=0;i<Math.min(rows.length,6);i++)
+    if(rows[i].some(c=>/^strike/i.test((c||"").trim()))){ hi=i; break; }
+  if(hi<0) return null;
+  const hdr=rows[hi].map(h=>(h||"").trim().toLowerCase());
+  const iK=hdr.findIndex(h=>/^strike/.test(h));
+  const findIn=(from,to,...names)=>{
+    for(const n of names){                       // pass 1: exact header match
+      for(let i=from;i<to;i++) if(hdr[i]===n) return i;
+    }
+    for(const n of names){                       // pass 2: contains, but never cross-match IV columns
+      for(let i=from;i<to;i++)
+        if(hdr[i]&&hdr[i].includes(n)&&!(n!=="iv"&&n!=="impl"&&hdr[i].includes("iv"))) return i;
+    }
+    return -1;
+  };
+  const side=(from,to)=>({
+    bid:findIn(from,to,"bid","bid/sell"), ask:findIn(from,to,"ask","ask/buy"),
+    mid:findIn(from,to,"mid","mark","last"),
+    iv:findIn(from,to,"iv mid","iv","impl"), oi:findIn(from,to,"open int","openint","oi")
+  });
+  const L=side(0,iK), R=side(iK+1,hdr.length);
+  const twoSided=L.bid>=0&&R.bid>=0 || L.mid>=0&&R.mid>=0;
+  const iType=hdr.findIndex(h=>/^(type|side|c\/p|right)$/.test(h));
+  const out=[];
+  const grab=(c,g)=>{
+    if(g.bid<0&&g.mid<0) return null;
+    const bid=g.bid>=0?num(c[g.bid]):null, ask=g.ask>=0?num(c[g.ask]):null;
+    let mid=g.mid>=0?num(c[g.mid]):null;
+    if(mid==null&&bid!=null&&ask!=null) mid=(bid+ask)/2;
+    let iv=g.iv>=0?num(c[g.iv]):null; if(iv!=null&&iv<5) iv*=100;
+    if(mid==null&&bid==null) return null;
+    return {bid,ask,mid,iv,oi:g.oi>=0?num(c[g.oi]):null};
+  };
+  for(let r=hi+1;r<rows.length;r++){
+    const c=rows[r]; const K=num(c[iK]);
+    if(K==null||K<=0) continue;
+    if(twoSided){
+      const rec={strike:K, call:grab(c,L), put:grab(c,R)};
+      if(rec.call||rec.put) out.push(rec);
+    }else if(iType>=0){
+      const isC=/^c/i.test((c[iType]||"").trim());
+      const g=grab(c,{bid:hdr.findIndex(h=>h.includes("bid")),ask:hdr.findIndex(h=>h.includes("ask")),
+        mid:hdr.findIndex(h=>h.includes("mid")||h.includes("last")),iv:hdr.findIndex(h=>h.includes("iv")),
+        oi:hdr.findIndex(h=>h.includes("open int")||h==="oi")});
+      if(!g) continue;
+      let rec=out.find(x=>x.strike===K); if(!rec){ rec={strike:K,call:null,put:null}; out.push(rec); }
+      rec[isC?"call":"put"]=g;
+    }
+  }
+  out.sort((a,b)=>a.strike-b.strike);
+  return out.length>=3?out:null;
+}
+/* ---- CBOE delayed quotes: free, no key, no auth, full greeks.
+   Yahoo's options endpoint now demands a session crumb, which is why it 'Failed to fetch'. ---- */
+async function fetchCboeChain(tk){
+  const paths=[`https://cdn.cboe.com/api/global/delayed_quotes/options/${tk}.json`,
+               `https://cdn.cboe.com/api/global/delayed_quotes/options/_${tk}.json`];  // _ prefix = index products
+  let j=null, lastErr=null;
+  for(const url of paths){
+    if(LOCAL_PROXY){                                   // best path: our own server fetches it
+      try{ const r=await fetch(LOCAL_PROXY(url),{signal:AbortSignal.timeout(25000)});
+        if(r.ok){ const d=await r.json(); if(d&&!d.error){ j=d; break; } lastErr=new Error(d.error||"proxy error"); }
+        else lastErr=new Error("local proxy HTTP "+r.status); }
+      catch(e){ lastErr=e; }
+    }
+    if(!j){ try{ const r=await fetch(url,{signal:AbortSignal.timeout(12000)});
+      if(r.ok){ j=await r.json(); break; } lastErr=new Error("HTTP "+r.status); }
+      catch(e){ lastErr=new Error("browser blocked the direct call (CORS)"); } }
+    if(!j){ try{ j=await proxied(url); if(j) break; }catch(e){ lastErr=e; } }
+  }
+  if(!j?.data?.options){
+    const hint=LOCAL_PROXY?"":" — start the app with START_CALCULATOR.bat so it can fetch data for you";
+    throw new Error((lastErr&&lastErr.message||"no data for "+tk)+hint);
+  }
+  const d=j.data;
+  const byExp={};
+  d.options.forEach(o=>{
+    const m=/^([A-Z]+)(\d{2})(\d{2})(\d{2})([CP])(\d{8})$/.exec(o.option||"");
+    if(!m) return;
+    const exp=`20${m[2]}-${m[3]}-${m[4]}`, K=parseInt(m[6],10)/1000;
+    const side=m[5]==="C"?"call":"put";
+    const tbl=byExp[exp]=byExp[exp]||{};
+    const row=tbl[K]=tbl[K]||{strike:K,call:null,put:null};
+    const mid=(o.bid!=null&&o.ask!=null&&(o.bid||o.ask))?(o.bid+o.ask)/2:(o.theo??o.last_trade_price??null);
+    row[side]={bid:o.bid??null, ask:o.ask??null, mid,
+      iv:(o.iv!=null&&o.iv>0)?+(o.iv*100).toFixed(2):null,
+      oi:o.open_interest??null, vol:o.volume??null, delta:o.delta??null};
+  });
+  chainAllExp=byExp; chainSpotLive=d.current_price??d.close??d.prev_day_close??null;
+  return {byExp, spot:chainSpotLive, asOf:j.timestamp||null};
+}
+/* ---- market phase (ET) ---- */
+function marketPhase(){
+  const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"}));
+  const d=et.getDay(), m=et.getHours()*60+et.getMinutes();
+  if(d===0||d===6) return {label:"weekend",open:false};
+  if(m<4*60)        return {label:"closed",open:false};
+  if(m<9*60+30)     return {label:"pre-market",open:false};
+  if(m<16*60)       return {label:"MARKET OPEN",open:true};
+  if(m<20*60)       return {label:"after-hours",open:false};
+  return {label:"closed",open:false};
+}
+let liveTimer=null, lastPull=null, lastChainTicker=null, chainAllExp=null, chainSpotLive=null;
+
+async function pullChain(quiet){
+  const tk=($("evalTicker").value||$("ticker").value||"").trim().toUpperCase();
+  if(!tk){ failMsg($("chainStatus"),"⚠ Enter a ticker first.",$("card-sanity")); return false; }
+  $("evalTicker").value=tk;
+  if(!quiet) $("chainStatus").textContent="Pulling "+tk+" chain from CBOE…";
+  try{
+    const {byExp,spot,asOf}=await fetchCboeChain(tk);
+    const exps=Object.keys(byExp).sort();
+    if(!exps.length) throw new Error("no expirations found");
+    const today=new Date().toISOString().slice(0,10);
+    const future=exps.filter(e=>e>=today);
+    // expiry dropdown
+    const sel=$("evalExpiry"), keep=sel.value;
+    sel.innerHTML=future.map(e=>`<option value="${e}">${e}</option>`).join("");
+    let want=(keep&&byExp[keep])?keep:($("expiry").value&&byExp[$("expiry").value]?$("expiry").value:future[0]||exps[0]);
+    sel.value=want;
+    const ch=Object.values(byExp[want]).filter(r=>r.call||r.put).sort((a,b)=>a.strike-b.strike);
+    if(ch.length<3) throw new Error("only "+ch.length+" strikes for "+want);
+    uploadedChain=ch;
+    $("expiry").value=want;
+    const changed = lastChainTicker && lastChainTicker!==tk;
+    lastChainTicker=tk;
+    $("ticker").value=tk;
+    if(spot){
+      const px=+(+spot).toFixed(2);
+      $("spotNow").value=px;
+      // a leftover "expected open" from another ticker is how you get nonsense predictions
+      if(changed||!$("spotOpen").value) $("spotOpen").value=px;
+      if(changed){ $("entryPx").value=""; $("optBid").value=""; $("optAsk").value=""; $("iv").value=""; }
+    }
+    const S=parseFloat($("spotNow").value)||spot;
+    const mv=S?impliedMoveAuto(ch,S):null;
+    if(mv) $("evalMove").value=mv.toFixed(1);
+    $("chainCsvBtn").style.display="block";
+    lastPull=new Date();
+    const ph=marketPhase();
+    const dot=ph.open?'<span style="color:var(--red)">●</span> ':"";
+    okMsg($("chainStatus"),`${dot}<span style="color:var(--green)">${tk} ${want}: ${ch.length} strikes</span>`
+      +(spot?` · spot $${(+spot).toFixed(2)}`:"")+(mv?` · implied move ±${mv.toFixed(1)}%`:"")
+      +`<br><span style="color:var(--muted)">${ph.label}`
+      +(asOf?` · CBOE snapshot ${asOf}`:"")
+      +` · updated ${lastPull.toLocaleTimeString()}`
+      +(liveTimer?` · refreshing every 60s`:"")+`</span>`);
+    if(!quiet) SFX.coin();
+    return true;
+  }catch(e){
+    failMsg($("chainStatus"),"⚠ Chain pull failed: "+e.message,$("card-sanity"));
+    return false;
+  }
+}
+$("yahooChainBtn").onclick=()=>pullChain(false);
+$("evalExpiry").onchange=()=>pullChain(false);
+
+/* live mode: re-pull the chain every 60s and refresh the spot every 20s */
+async function refreshSpotOnly(){
+  const tk=($("evalTicker").value||"").trim().toUpperCase(); if(!tk) return;
+  try{
+    const j=await proxied(`https://query1.finance.yahoo.com/v8/finance/chart/${tk}?interval=1m&range=1d&includePrePost=true`);
+    const m=j?.chart?.result?.[0]?.meta;
+    const px=m?.postMarketPrice??m?.preMarketPrice??m?.regularMarketPrice;
+    if(px){ $("spotNow").value=+(+px).toFixed(2);
+      const el=$("chainStatus"); if(el&&el.innerHTML) el.innerHTML=el.innerHTML.replace(/spot \$[\d.]+/,"spot $"+(+px).toFixed(2)); }
+  }catch(_){}
+}
+function setLive(on){
+  if(liveTimer){ clearInterval(liveTimer.chain); clearInterval(liveTimer.spot); liveTimer=null; }
+  $("liveBtn").textContent=on?"■ Stop live":"🔴 Go live";
+  $("liveBtn").className=on?"":"secondary";
+  if(!on){ $("liveBtn").style.background=""; return; }
+  liveTimer={chain:setInterval(()=>pullChain(true),60000), spot:setInterval(refreshSpotOnly,20000)};
+  pullChain(true); refreshSpotOnly();
+}
+$("liveBtn").onclick=()=>{
+  const on=!liveTimer;
+  if(on&&!($("evalTicker").value||"").trim()){ failMsg($("chainStatus"),"⚠ Enter a ticker first.",$("card-sanity")); return; }
+  setLive(on);
+  const ph=marketPhase();
+  if(on&&!ph.open) $("chainStatus").innerHTML+=`<br><span style="color:var(--gold)">Heads up: it's ${ph.label} — quotes won't move until 9:30 AM ET.</span>`;
+  SFX.select();
+};
+function chainFromYahoo(){
+  if(!chainData?.res?.options?.[0]) return null;
+  const o=chainData.res.options[0], map={};
+  const add=(list,side)=>(list||[]).forEach(c=>{
+    const rec=map[c.strike]=map[c.strike]||{strike:c.strike,call:null,put:null};
+    rec[side]={bid:c.bid??null, ask:c.ask??null,
+      mid:(c.bid&&c.ask)?(c.bid+c.ask)/2:(c.lastPrice??null),
+      iv:c.impliedVolatility?c.impliedVolatility*100:null, oi:c.openInterest??null};
+  });
+  add(o.calls,"call"); add(o.puts,"put");
+  const out=Object.values(map).sort((a,b)=>a.strike-b.strike);
+  return out.length>=3?out:null;
+}
+function activeChain(){ return uploadedChain||chainFromYahoo(); }
+
+function impliedMoveAuto(chain,S){
+  let best=null;
+  chain.forEach(r=>{ if(r.call?.mid!=null&&r.put?.mid!=null){
+    if(!best||Math.abs(r.strike-S)<Math.abs(best.strike-S)) best=r; } });
+  if(!best) return null;
+  return (best.call.mid+best.put.mid)/S*100;   // ATM straddle as % of spot
+}
+function evaluateChain(side,K,mvPct){
+  const chain=activeChain();
+  if(!chain) return {error:"No chain loaded. Upload a chain CSV or use Fetch."};
+  const S=parseFloat($("spotNow").value)||parseFloat($("spotOpen").value);
+  if(!S) return {error:"Need the stock price — fill 'Prev close / last' first."};
+  const expStr=$("expiry").value;
+  if(!expStr) return {error:"Set the expiration date in the calculator first."};
+  const T=Math.max((expiryDateTime(expStr)-new Date())/YEAR_MS,1/(365*24));
+  const r=(parseFloat($("rate").value)||0)/100;
+  const isC=/^c/i.test(side);
+  const mv=(mvPct||impliedMoveAuto(chain,S)||0)/100;
+  if(!mv) return {error:"Couldn't derive an implied move — enter one manually."};
+  const rows=[];
+  chain.forEach(rec=>{
+    const g=isC?rec.call:rec.put; if(!g||g.mid==null||g.mid<=0) return;
+    const otm=isC?rec.strike>=S:rec.strike<=S;
+    if(!otm) return;
+    const iv=(g.iv||100)/100;
+    const be=isC?rec.strike+g.mid:rec.strike-g.mid;
+    const need=isC?(be-S)/S:(S-be)/S;
+    const reach=need/mv;
+    const d2=(Math.log(S/rec.strike)+(r-iv*iv/2)*T)/(iv*Math.sqrt(T));
+    const p=isC?N(d2):N(-d2);
+    const spr=(g.bid!=null&&g.ask!=null&&g.mid>0)?(g.ask-g.bid)/g.mid*100:null;
+    rows.push({strike:rec.strike, mid:g.mid, bid:g.bid, ask:g.ask, iv:g.iv, oi:g.oi, be:+be.toFixed(2),
+      need_pct:+(need*100).toFixed(1), reach:+reach.toFixed(2), p_itm:+(p*100).toFixed(0),
+      spread_pct:spr!=null?+spr.toFixed(0):null});
+  });
+  if(!rows.length) return {error:"No OTM "+(isC?"calls":"puts")+" with prices found in the chain."};
+  rows.sort((a,b)=>isC?a.strike-b.strike:b.strike-a.strike);
+  // IV markup vs neighbours
+  rows.forEach((x,i)=>{
+    const nb=[rows[i-1],rows[i+1]].filter(n=>n&&n.iv);
+    if(x.iv&&nb.length){ const avg=nb.reduce((s,n)=>s+n.iv,0)/nb.length;
+      x.iv_markup_pct=+((x.iv/avg-1)*100).toFixed(0); }
+  });
+  const score=x=>(x.reach<=1.1?0:x.reach<=1.4?1:x.reach<=1.8?2:3)
+    +(x.spread_pct!=null&&x.spread_pct>30?1:0)+((x.oi??0)<200?0.5:0)
+    +((x.iv_markup_pct??0)>8?0.5:0);
+  const target=K!=null?rows.find(x=>Math.abs(x.strike-K)<1e-9):null;
+  const ranked=[...rows].sort((a,b)=>score(a)-score(b)||a.reach-b.reach);
+  return {side:isC?"call":"put", spot:S, implied_move_pct:+(mv*100).toFixed(1),
+    days_to_expiry:+(T*365).toFixed(1), your_pick:target||null,
+    your_pick_score:target?+score(target).toFixed(1):null,
+    best:ranked.slice(0,3), all:rows};
+}
+/* ================= 🔎 ANOMALY SCAN =================
+   The four things desks actually watch that we can compute from this data:
+   fresh positioning (volume vs open interest), directional skew of today's flow,
+   open-interest walls that price pins to, and term-structure inversion. */
+function findAnomalies(){
+  const chain=activeChain();
+  if(!chain) return {error:"No chain loaded — pull one first."};
+  const S=parseFloat($("spotNow").value)||chainSpotLive;
+  if(!S) return {error:"Need the stock price."};
+  const flat=[];
+  chain.forEach(rec=>["call","put"].forEach(sd=>{
+    const g=rec[sd]; if(!g) return;
+    flat.push({strike:rec.strike, side:sd, vol:g.vol??null, oi:g.oi??null,
+      mid:g.mid, bid:g.bid, ask:g.ask, iv:g.iv});
+  }));
+  const withVol=flat.filter(x=>x.vol!=null&&x.vol>0);
+  const out={spot:+(+S).toFixed(2), has_volume:withVol.length>0, notes:[]};
+
+  // 1. volume vs open interest — new money, not shuffling
+  if(withVol.length){
+    const vols=withVol.map(x=>x.vol).sort((a,b)=>a-b);
+    const med=vols[Math.floor(vols.length/2)]||1;
+    out.fresh=withVol.map(x=>({...x, vol_oi:+(x.vol/Math.max(x.oi||1,1)).toFixed(2),
+        vs_median:+(x.vol/Math.max(med,1)).toFixed(1)}))
+      .filter(x=>x.vol_oi>=1&&x.vol>=Math.max(25,med*3))
+      .sort((a,b)=>b.vol_oi-a.vol_oi).slice(0,6);
+    if(out.fresh.some(x=>x.vol_oi>=3))
+      out.notes.push("Volume above 3× open interest on at least one strike — that rarely happens without a catalyst.");
+    // 2. direction of today's flow
+    const cv=withVol.filter(x=>x.side==="call").reduce((a,b)=>a+b.vol,0);
+    const pv=withVol.filter(x=>x.side==="put").reduce((a,b)=>a+b.vol,0);
+    out.call_vol=cv; out.put_vol=pv;
+    out.pc_ratio=cv?+(pv/cv).toFixed(2):null;
+    if(out.pc_ratio!=null) out.notes.push(out.pc_ratio>1.3?`Put-heavy flow today (P/C ${out.pc_ratio}) — hedging or bearish positioning.`
+      :out.pc_ratio<0.6?`Call-heavy flow today (P/C ${out.pc_ratio}) — upside speculation.`
+      :`Flow is balanced (P/C ${out.pc_ratio}).`);
+  }
+  // 3. open-interest walls — where price tends to get pinned into expiry
+  const oiRows=flat.filter(x=>x.oi!=null&&x.oi>0);
+  if(oiRows.length){
+    const byStrike={};
+    oiRows.forEach(x=>{ byStrike[x.strike]=byStrike[x.strike]||{strike:x.strike,call:0,put:0,total:0};
+      byStrike[x.strike][x.side]+=x.oi; byStrike[x.strike].total+=x.oi; });
+    const walls=Object.values(byStrike).sort((a,b)=>b.total-a.total).slice(0,4);
+    out.oi_walls=walls;
+    const top=walls[0];
+    if(top&&Math.abs(top.strike-S)/S<0.06)
+      out.notes.push(`Biggest open-interest wall is $${top.strike} (${top.total.toLocaleString()} contracts), right on top of spot — a classic pinning magnet into expiry.`);
+    // crude max pain: strike where total in-the-money value owed is smallest
+    let mp=null;
+    Object.values(byStrike).forEach(t=>{
+      let pain=0;
+      Object.values(byStrike).forEach(u=>{ pain+=Math.max(t.strike-u.strike,0)*u.call+Math.max(u.strike-t.strike,0)*u.put; });
+      if(!mp||pain<mp.pain) mp={strike:t.strike,pain};
+    });
+    if(mp) out.max_pain=mp.strike;
+  }
+  // 4. term structure — front-week IV above later expiries means an event is priced in
+  if(chainAllExp){
+    const today=new Date().toISOString().slice(0,10);
+    const terms=Object.keys(chainAllExp).filter(e=>e>=today).sort().slice(0,5).map(e=>{
+      const rows=Object.values(chainAllExp[e]);
+      let best=null;
+      rows.forEach(r=>{ if(r.call?.iv&&(!best||Math.abs(r.strike-S)<Math.abs(best.strike-S))) best=r; });
+      return best?{expiry:e, atm_iv:+best.call.iv.toFixed(1), strike:best.strike}:null;
+    }).filter(Boolean);
+    out.term_structure=terms;
+    if(terms.length>=2&&terms[0].atm_iv>terms[1].atm_iv*1.1)
+      out.notes.push(`Term structure is INVERTED: ${terms[0].expiry} at ${terms[0].atm_iv}% vs ${terms[1].expiry} at ${terms[1].atm_iv}%. The market is pricing an event before the front expiry — earnings, a ruling, a catalyst.`);
+    else if(terms.length>=2)
+      out.notes.push(`Term structure is normal (${terms[0].atm_iv}% → ${terms[1].atm_iv}%) — no imminent event priced in.`);
+  }
+  if(!out.notes.length) out.notes.push("Nothing unusual in this chain's volume, open interest or term structure.");
+  return out;
+}
+function anomHTML(v){
+  if(v.error) return `<div class="verdict"><h3>Hold up</h3>${v.error}</div>`;
+  let h=`<div class="verdict ${v.notes.some(n=>/INVERTED|3×/.test(n))?"smart":"meh"}"><h3>🔎 Anomaly scan</h3>`
+    +v.notes.map(n=>`• ${n}`).join("<br>")+`</div>`;
+  if(v.fresh&&v.fresh.length){
+    h+=`<div class="lbl" style="margin-top:8px">FRESH POSITIONING — volume vs open interest</div><table>`
+      +`<tr><th>Contract</th><th>Volume</th><th>OI</th><th>Vol/OI</th><th>vs median</th><th>Mid</th></tr>`
+      +v.fresh.map(x=>`<tr${dataAttrs(x)}><td>$${x.strike} ${x.side==="call"?"C":"P"}</td>`
+        +`<td>${(x.vol||0).toLocaleString()}</td><td>${(x.oi||0).toLocaleString()}</td>`
+        +`<td class="${x.vol_oi>=3?"pos":""}">${x.vol_oi}×</td><td>${x.vs_median}×</td>`
+        +`<td>${x.mid!=null?"$"+x.mid.toFixed(2):"–"}</td></tr>`).join("")+`</table>`;
+  } else if(!v.has_volume){
+    h+=`<div class="hint" style="color:var(--gold)">No volume data in this snapshot — volume resets overnight, so run this during market hours for the flow signals.</div>`;
+  }
+  if(v.oi_walls&&v.oi_walls.length){
+    h+=`<div class="lbl" style="margin-top:8px">OPEN-INTEREST WALLS${v.max_pain!=null?` · max pain $${v.max_pain}`:""}</div><table>`
+      +`<tr><th>Strike</th><th>Call OI</th><th>Put OI</th><th>Total</th><th>vs spot</th></tr>`
+      +v.oi_walls.map(w=>`<tr><td>$${w.strike}</td><td>${w.call.toLocaleString()}</td><td>${w.put.toLocaleString()}</td>`
+        +`<td>${w.total.toLocaleString()}</td><td>${((w.strike-v.spot)/v.spot*100).toFixed(1)}%</td></tr>`).join("")+`</table>`;
+  }
+  if(v.term_structure&&v.term_structure.length>1){
+    h+=`<div class="lbl" style="margin-top:8px">TERM STRUCTURE — ATM IV by expiry</div><table>`
+      +`<tr><th>Expiry</th><th>ATM IV</th><th>vs front</th></tr>`
+      +v.term_structure.map((t,i)=>`<tr><td>${t.expiry}</td><td>${t.atm_iv}%</td>`
+        +`<td>${i?((t.atm_iv/v.term_structure[0].atm_iv-1)*100).toFixed(0)+"%":"—"}</td></tr>`).join("")+`</table>`;
+  }
+  h+=`<div class="hint">Volume/OI above 1 means today's trading opened new positions rather than closing old ones. `
+    +`OI walls mark where dealers are most hedged, which is why price often gravitates there into expiry. `
+    +`An inverted term structure is the cleanest free signal that something is scheduled before the front expiry.</div>`;
+  return h;
+}
+$("anomBtn").onclick=()=>{
+  const v=findAnomalies();
+  $("evalOut").innerHTML=anomHTML(v);
+  if(v.error){ led("bad"); flashEl($("card-sanity"),"errshake"); SFX.buzzer(); }
+  else { led(v.notes.some(n=>/INVERTED|3×/.test(n))?"good":null,4000); SFX.levelup(); }
+};
+
+/* ---- click any scan result to load it into the calculator ---- */
+function dataAttrs(o){
+  const g=v=>(v==null||isNaN(v))?"":v;
+  return ` data-k="${g(o.strike)}" data-s="${o.side||(o.isCall?"call":"put")}"`
+    +` data-mid="${g(o.mid??o.cost)}" data-bid="${g(o.bid)}" data-ask="${g(o.ask)}" data-iv="${g(o.iv)}"`
+    +` class="pickable ${o.rowClass||""}"`;
+}
+function loadContract(d){
+  const K=parseFloat(d.k); if(!K) return;
+  const isC=(d.s||"call")==="call";
+  isCall=isC;
+  $("tCall").classList.toggle("active",isC); $("tPut").classList.toggle("active",!isC);
+  $("strike").value=K;
+  const exp=$("evalExpiry").value||$("expiry").value;
+  if(exp) $("expiry").value=exp;
+  const tk=($("evalTicker").value||$("ticker").value||"").toUpperCase();
+  if(tk&&$("ticker").value.toUpperCase()!==tk){        // different underlying: drop stale prices
+    $("ticker").value=tk; $("spotOpen").value=$("spotNow").value||"";
+  }
+  if(d.bid) $("optBid").value=d.bid;
+  if(d.ask) $("optAsk").value=d.ask;
+  if(d.iv)  $("iv").value=(+d.iv).toFixed(1);
+  if(!$("spotOpen").value&&$("spotNow").value) $("spotOpen").value=$("spotNow").value;
+  $("entryPx").value="";                       // this is a prospective buy, not a holding
+  $("qtyIn").value=$("qtyIn").value||1;
+  SFX.select();
+  $("calcBtn").click();
+  const card=$("card-inputs"); if(card&&card.scrollIntoView) card.scrollIntoView({behavior:"smooth",block:"center"});
+}
+$("evalOut").addEventListener("click",e=>{
+  const el=e.target.closest&&e.target.closest("[data-k]");
+  if(!el) return;
+  flashEl(el,"rowhit");
+  loadContract(el.dataset);
+});
+
+/* ================= relative value: which contracts are cheap vs their own curve =================
+   Fit IV against log-moneyness across the whole chain, then flag strikes trading BELOW the fit.
+   Also check put-call parity, where a genuine dislocation shows up as a synthetic mispricing. */
+function fitCurve(pts,deg){
+  if(pts.length<deg+1) return null;
+  const n=deg+1, ATA=Array.from({length:n},()=>new Array(n).fill(0)), ATb=new Array(n).fill(0);
+  pts.forEach(([x,y])=>{ const row=[]; for(let d=deg;d>=0;d--) row.push(Math.pow(x,d));
+    for(let j=0;j<n;j++){ ATb[j]+=row[j]*y; for(let k=0;k<n;k++) ATA[j][k]+=row[j]*row[k]; } });
+  for(let i=0;i<n;i++){ let piv=i;
+    for(let r=i+1;r<n;r++) if(Math.abs(ATA[r][i])>Math.abs(ATA[piv][i])) piv=r;
+    if(Math.abs(ATA[piv][i])<1e-12) return null;
+    [ATA[i],ATA[piv]]=[ATA[piv],ATA[i]]; [ATb[i],ATb[piv]]=[ATb[piv],ATb[i]];
+    for(let r=0;r<n;r++){ if(r===i) continue; const f=ATA[r][i]/ATA[i][i];
+      for(let c=i;c<n;c++) ATA[r][c]-=f*ATA[i][c]; ATb[r]-=f*ATb[i]; } }
+  const co=ATb.map((v,i)=>v/ATA[i][i]);
+  return x=>{ let y=0; for(let i=0;i<co.length;i++) y+=co[i]*Math.pow(x,co.length-1-i); return y; };
+}
+function findValue(){
+  const chain=activeChain();
+  if(!chain) return {error:"No chain loaded — pull one first."};
+  const S=parseFloat($("spotNow").value);
+  const expStr=$("expiry").value;
+  if(!S) return {error:"Need the stock price."};
+  if(!expStr) return {error:"Need the expiration date."};
+  const T=Math.max((expiryDateTime(expStr)-new Date())/YEAR_MS,1/(365*24));
+  const r=(parseFloat($("rate").value)||0)/100, q=0;
+  // collect tradeable quotes
+  const rows=[];
+  chain.forEach(rec=>["call","put"].forEach(sd=>{
+    const g=rec[sd]; if(!g||g.mid==null||g.mid<=0.01) return;
+    const isC=sd==="call";
+    const intr=isC?Math.max(S-rec.strike,0):Math.max(rec.strike-S,0);
+    if(g.mid<=intr+0.005) return;                       // no extrinsic left, IV meaningless
+    let iv=g.iv!=null&&g.iv>1?g.iv/100:impliedVol(g.mid,S,rec.strike,T,r,q,isC);
+    if(!iv||iv<0.05||iv>6) return;
+    const spread=(g.bid!=null&&g.ask!=null&&g.mid>0)?(g.ask-g.bid)/g.mid*100:null;
+    rows.push({strike:rec.strike, side:sd, mid:g.mid, bid:g.bid, ask:g.ask, iv:iv*100,
+      oi:g.oi, spread, m:Math.log(rec.strike/S), intr});
+  }));
+  if(rows.length<6) return {error:"Not enough live quotes in this chain to compare."};
+  // fit each side separately, weighting to liquid strikes
+  const out=[];
+  ["call","put"].forEach(sd=>{
+    const side=rows.filter(x=>x.side===sd);
+    if(side.length<4) return;
+    const liquid=side.filter(x=>(x.spread==null||x.spread<=60)&&(x.oi==null||x.oi>=5));
+    const basis=(liquid.length>=4?liquid:side).map(x=>[x.m,x.iv]);
+    const f=fitCurve(basis,Math.min(2,basis.length-2));
+    if(!f) return;
+    side.forEach(x=>{
+      const fair=f(x.m);
+      if(!(fair>1)) return;
+      const dVol=x.iv-fair;                              // negative = cheap
+      const fairPx=bs(S,x.strike,T,Math.max(fair/100,0.01),r,q,sd==="call").price;
+      out.push({...x, fair_iv:+fair.toFixed(1), iv:+x.iv.toFixed(1),
+        vol_diff:+dVol.toFixed(1), fair_px:+fairPx.toFixed(3),
+        edge:+((fairPx-x.mid)*100).toFixed(0),          // $ per contract vs the curve
+        edge_pct:+((fairPx-x.mid)/x.mid*100).toFixed(0)});
+    });
+  });
+  // put-call parity dislocations: call - put should equal S - K*e^-rT
+  const parity=[];
+  chain.forEach(rec=>{
+    const c=rec.call, p=rec.put;
+    if(!c?.mid||!p?.mid) return;
+    const theo=S-rec.strike*Math.exp(-r*T);
+    const actual=c.mid-p.mid;
+    const gap=actual-theo;
+    if(Math.abs(gap)>Math.max(0.05,S*0.004))
+      parity.push({strike:rec.strike, gap:+gap.toFixed(2),
+        cheap_side:gap<0?"call":"put", note:gap<0?"call cheap vs put":"put cheap vs call"});
+  });
+  const tradeable=x=>(x.spread==null||x.spread<=35)&&(x.oi==null||x.oi>=10)&&x.mid>=0.05;
+  const cheap=out.filter(x=>x.vol_diff<0).sort((a,b)=>a.vol_diff-b.vol_diff);
+  const rich =out.filter(x=>x.vol_diff>0).sort((a,b)=>b.vol_diff-a.vol_diff);
+  return {spot:S, expiry:expStr, days:+(T*365).toFixed(1), count:out.length,
+    cheap:cheap.filter(tradeable).slice(0,6), cheap_illiquid:cheap.filter(x=>!tradeable(x)).slice(0,4),
+    rich:rich.filter(tradeable).slice(0,4), parity:parity.slice(0,4), all:out};
+}
+function valueHTML(v){
+  if(v.error) return `<div class="verdict"><h3>Hold up</h3>${v.error}</div>`;
+  const row=x=>`<tr${dataAttrs(x)}><td>$${x.strike} ${x.side==="call"?"C":"P"}</td><td>${x.mid.toFixed(2)}</td>`
+    +`<td>${x.fair_px.toFixed(2)}</td><td>${x.iv}%</td><td>${x.fair_iv}%</td>`
+    +`<td class="${x.vol_diff<0?'pos':'neg'}">${x.vol_diff>0?"+":""}${x.vol_diff}</td>`
+    +`<td class="${x.edge>0?'pos':'neg'}">${x.edge>0?"+":""}$${x.edge}</td>`
+    +`<td>${x.spread!=null?x.spread.toFixed(0)+"%":"–"}</td><td>${x.oi??"–"}</td></tr>`;
+  const head=`<tr><th>Contract</th><th>Mid</th><th>Fair</th><th>IV</th><th>Curve IV</th><th>Δvol</th><th>Edge</th><th>Sprd</th><th>OI</th></tr>`;
+  let h=`<div class="verdict ${v.cheap.length?"smart":"meh"}"><h3>Relative value · ${v.days} days</h3>`
+    +(v.cheap.length
+      ? `${v.cheap.length} contract${v.cheap.length>1?"s":""} trading below the chain's own volatility curve. `
+        +`Cheapest: <b>$${v.cheap[0].strike} ${v.cheap[0].side}</b> at ${v.cheap[0].iv}% vs a fitted ${v.cheap[0].fair_iv}% — about $${v.cheap[0].edge} per contract of theoretical edge.`
+      : `Nothing meaningfully below the curve — this chain is priced consistently.`)
+    +`</div>`;
+  if(v.cheap.length) h+=`<div class="lbl" style="color:var(--green); margin-top:8px">DISCOUNTED (liquid enough to actually trade)</div><table>${head}${v.cheap.map(row).join("")}</table>`;
+  if(v.cheap_illiquid.length) h+=`<div class="lbl" style="color:var(--gold); margin-top:8px">CHEAP BUT ILLIQUID — usually a stale quote, not free money</div><table>${head}${v.cheap_illiquid.map(row).join("")}</table>`;
+  if(v.rich.length) h+=`<div class="lbl" style="color:var(--red); margin-top:8px">EXPENSIVE vs the curve (better to sell than buy)</div><table>${head}${v.rich.map(row).join("")}</table>`;
+  if(v.parity.length) h+=`<div class="lbl" style="margin-top:8px">PUT-CALL PARITY GAPS</div>`
+    +`<table><tr><th>Strike</th><th>Gap</th><th>What it means</th></tr>`
+    +v.parity.map(p=>`<tr><td>$${p.strike}</td><td>${p.gap>0?"+":""}${p.gap}</td><td>${p.note}</td></tr>`).join("")+`</table>`;
+  h+=`<div class="hint">"Fair" = what the contract would cost if it sat exactly on the curve fitted through the rest of the chain. `
+    +`Δvol is in volatility points. A discount is a reason to look closer, not a free lunch — cheap IV usually means a stale or thin quote, `
+    +`and the edge disappears if you cross a wide spread.</div>`;
+  return h;
+}
+$("valueBtn").onclick=()=>{
+  const v=findValue();
+  $("evalOut").innerHTML=valueHTML(v);
+  if(v.error){ led("bad"); flashEl($("card-sanity"),"errshake"); SFX.buzzer(); }
+  else if(v.cheap.length){ led("good",5000); SFX.levelup(); } else SFX.select();
+};
+/* ================= 🚀 MOONSHOTS =================
+   The two best-looking lottery tickets: max payoff per dollar at a 2-sigma move,
+   discounted by the square root of the odds so a 0.2% hope doesn't beat a 6% one,
+   and filtered for contracts that actually have a bid. */
+function findMoonshots(sigmaTarget){
+  const chain=activeChain();
+  if(!chain) return {error:"No chain loaded — pull one first."};
+  const S=parseFloat($("spotNow").value), expStr=$("expiry").value;
+  if(!S) return {error:"Need the stock price."};
+  if(!expStr) return {error:"Need the expiration date."};
+  const T=Math.max((expiryDateTime(expStr)-new Date())/YEAR_MS,1/(365*24));
+  const r=(parseFloat($("rate").value)||0)/100, q=0;
+  const nSig=sigmaTarget||2;
+  // ATM vol sets the size of the dream
+  let atm=null;
+  chain.forEach(rec=>{ if(rec.call?.mid!=null&&rec.put?.mid!=null&&(!atm||Math.abs(rec.strike-S)<Math.abs(atm.strike-S))) atm=rec; });
+  let sig=null;
+  if(atm){ const iv=atm.call.iv?atm.call.iv/100:impliedVol(atm.call.mid,S,atm.strike,T,r,q,true); if(iv) sig=iv; }
+  if(!sig) sig=0.6;
+  const move=sig*Math.sqrt(T);
+  const upTarget=S*Math.exp(nSig*move), downTarget=S*Math.exp(-nSig*move);
+  const cands=[];
+  chain.forEach(rec=>["call","put"].forEach(sd=>{
+    const g=rec[sd]; if(!g||g.mid==null) return;
+    const isC=sd==="call";
+    const otm=isC?rec.strike>S:rec.strike<S;
+    if(!otm) return;
+    const cost=g.mid;
+    if(!(cost>=0.02&&cost<=Math.max(0.6,S*0.05))) return;      // it has to be a cheap ticket
+    if(g.bid!=null&&g.bid<=0) return;                          // no bid = no exit
+    const spread=(g.bid!=null&&g.ask!=null&&cost>0)?(g.ask-g.bid)/cost*100:null;
+    if(spread!=null&&spread>60) return;
+    const iv=(g.iv&&g.iv>1)?g.iv/100:impliedVol(cost,S,rec.strike,T,r,q,isC);
+    if(!iv) return;
+    const d2=(Math.log(S/rec.strike)+(r-q-iv*iv/2)*T)/(iv*Math.sqrt(T));
+    const p=isC?N(d2):N(-d2);
+    if(p<0.005) return;                                        // sub-0.5% is not a shot, it's a donation
+    const target=isC?upTarget:downTarget;
+    const payoff=isC?Math.max(target-rec.strike,0):Math.max(rec.strike-target,0);
+    if(payoff<=0) return;
+    const mult=payoff/cost;
+    if(mult<2) return;
+    cands.push({strike:rec.strike, side:sd, cost:+cost.toFixed(2), bid:g.bid, ask:g.ask,
+      iv:+(iv*100).toFixed(0), oi:g.oi, spread:spread!=null?+spread.toFixed(0):null,
+      breakeven:+((isC?rec.strike+cost:rec.strike-cost)).toFixed(2),
+      needs_pct:+(((isC?rec.strike+cost:rec.strike-cost)-S)/S*100).toFixed(1),
+      target:+target.toFixed(2), payoff_per_contract:+(payoff*100).toFixed(0),
+      multiple:+mult.toFixed(1), prob_itm_pct:+(p*100).toFixed(1),
+      score:+(mult*Math.sqrt(p)).toFixed(2)});
+  }));
+  if(!cands.length) return {error:"No tradeable long shots on this chain — everything cheap has no bid, or nothing is cheap."};
+  const best=sd=>cands.filter(x=>x.side===sd).sort((a,b)=>b.score-a.score)[0]||null;
+  return {spot:S, expiry:expStr, days:+(T*365).toFixed(1), sigma_pct:+(move*100).toFixed(1),
+    up_target:+upTarget.toFixed(2), down_target:+downTarget.toFixed(2), n_sigma:nSig,
+    call:best("call"), put:best("put"),
+    runners_up:cands.sort((a,b)=>b.score-a.score).slice(0,6)};
+}
+function moonHTML(v){
+  if(v.error) return `<div class="verdict"><h3>Hold up</h3>${v.error}</div>`;
+  const card=(x,icon,label)=>{
+    if(!x) return `<div class="verdict meh"><h3>${icon} ${label}</h3>Nothing on this side clears the bar — no cheap contract with a real bid.</div>`;
+    return `<div class="verdict smart pickcard"${dataAttrs({...x,mid:x.cost})}><h3>${icon} ${label} — $${x.strike} ${x.side}</h3>`
+      +`<b style="font-size:1.15rem">${x.multiple}×</b> if ${$("evalTicker").value||$("ticker").value||"the stock"} reaches `
+      +`<b>$${x.target}</b> by ${v.expiry} · costs <b>$${(x.cost*100).toFixed(0)}</b> per contract, pays <b>$${x.payoff_per_contract}</b>`
+      +`<br><span style="color:var(--muted)">Breakeven $${x.breakeven} (${x.needs_pct>0?"+":""}${x.needs_pct}%) · `
+      +`${x.prob_itm_pct}% chance it finishes in the money · IV ${x.iv}%`
+      +(x.spread!=null?` · ${x.spread}% spread`:"")+(x.oi!=null?` · OI ${x.oi}`:"")+`</span></div>`;
+  };
+  let h=`<div class="hint" style="margin-bottom:8px">Target = a ${v.n_sigma}σ move (±${(v.sigma_pct*v.n_sigma).toFixed(1)}%) by ${v.expiry}. `
+    +`Spot $${v.spot} → up $${v.up_target} / down $${v.down_target}.</div>`;
+  h+=card(v.call,"🚀","MOONSHOT CALL");
+  h+=card(v.put,"🪨","BOULDER PUT");
+  if(v.runners_up.length>1){
+    h+=`<div class="lbl" style="margin-top:8px">RUNNERS-UP</div><table>`
+      +`<tr><th>Contract</th><th>Cost</th><th>Payoff at target</th><th>Multiple</th><th>P(ITM)</th><th>Sprd</th><th>OI</th></tr>`
+      +v.runners_up.map(x=>`<tr${dataAttrs({...x,mid:x.cost})}><td>$${x.strike} ${x.side==="call"?"C":"P"}</td><td>$${(x.cost*100).toFixed(0)}</td>`
+        +`<td>$${x.payoff_per_contract}</td><td>${x.multiple}×</td><td>${x.prob_itm_pct}%</td>`
+        +`<td>${x.spread??"–"}%</td><td>${x.oi??"–"}</td></tr>`).join("")+`</table>`;
+  }
+  h+=`<div class="warn">Reality check: these are lottery tickets. The ${v.call?v.call.prob_itm_pct:"—"}% and ${v.put?v.put.prob_itm_pct:"—"}% figures `
+    +`are the market's own odds, which means the overwhelmingly likely outcome for both is $0. `
+    +`They're ranked by payoff per dollar adjusted for those odds — best of a long-shot bunch, not good bets. `
+    +`Size them as money you're fine losing entirely. Not financial advice.</div>`;
+  return h;
+}
+$("moonBtn").onclick=()=>{
+  const v=findMoonshots(2);
+  $("evalOut").innerHTML=moonHTML(v);
+  if(v.error){ led("bad"); flashEl($("card-sanity"),"errshake"); SFX.buzzer(); }
+  else { led("good",6000); SFX.powerup(); setTimeout(()=>SFX.levelup(),260); }
+};
+/* One definition of health, used for both the verdict and the row colours.
+   green = actually healthy · gold = cheap vs its neighbours · red = trap */
+function classifyRow(x){
+  const thin  = (x.oi??0)<25 || (x.spread_pct??0)>40 || x.mid<0.03;
+  const far   = x.reach>1.6 || x.p_itm<8;
+  const cheap = (x.iv_markup_pct??0)<-8;
+  const good  = x.reach<=1.15 && (x.spread_pct??99)<=30 && (x.oi??0)>=50 && x.p_itm>=15;
+  if(far||thin) return "bad";
+  if(good) return "good";
+  if(cheap) return "deal";
+  return "";
+}
+function verdictHTML(ev,K){
+  if(ev.error) return `<div class="verdict"><h3>Hold up</h3>${ev.error}</div>`;
+  const t=ev.your_pick;
+  const wit=x=>{
+    const cls=classifyRow(x);
+    if(cls==="good") return ["smart","GREEN. Breakeven sits inside the expected move and there's enough liquidity to get out. As gambles go, this one's wearing a seatbelt."];
+    if(cls==="deal") return ["meh","GOLD. It's cheap relative to its neighbours, but cheap isn't the same as likely — check the odds column before you fall in love."];
+    if(cls==="bad")  return ["","RED. "+(x.reach>1.6
+        ? "You need "+x.reach+"× the expected move just to break even — that's not a plan, it's a prayer with a bid/ask."
+        : "The quote is too thin or too wide to trade cleanly — you'd lose a chunk just getting in and out.")];
+    return ["meh","AMBER. Breakeven is just past what the market expects — spicy, but defensible."];
+  };
+  let h="";
+  if(t){
+    const [cls,line]=wit(t);
+    h+=`<div class="verdict ${cls}"><h3>Verdict on the $${t.strike} ${ev.side}</h3>${line}<br>`
+      +`Breakeven $${t.be} (${t.need_pct}% away) · ${t.p_itm}% chance ITM · spread ${t.spread_pct??"?"}%`
+      +(t.oi!=null?` · OI ${t.oi}`:"")
+      +((t.iv_markup_pct??0)>8?`<br><span style="color:var(--gold)">⚠ This strike's IV is ${t.iv_markup_pct}% richer than its neighbours — you're paying the dumb tax.</span>`:"")
+      +((t.spread_pct??0)>30?`<br><span style="color:var(--gold)">⚠ ${t.spread_pct}% spread — you lose that just walking through the door.</span>`:"")
+      +`</div>`;
+  } else if(K!=null){
+    h+=`<div class="verdict"><h3>Strike not found</h3>$${K} isn't in the loaded chain — showing the board anyway.</div>`;
+  }
+  h+=`<table><tr><th>Strike</th><th>Mid</th><th>BE</th><th>Needs</th><th>vs move</th><th>P(ITM)</th><th>Sprd</th><th>OI</th><th>IV</th></tr>`;
+  let nGood=0,nDeal=0,nBad=0;
+  ev.all.forEach(x=>{
+    const cls=classifyRow(x);
+    if(cls==="good")nGood++; else if(cls==="deal")nDeal++; else if(cls==="bad")nBad++;
+    const mine=t&&x.strike===t.strike?' outline:2px solid #fff;':'';
+    h+=`<tr${dataAttrs({...x,side:ev.side,rowClass:"rv-"+(cls||"neutral")})} style="${mine}"><td>$${x.strike}${cls==="deal"?" 💰":""}</td>`
+      +`<td>${x.mid.toFixed(2)}</td><td>${x.be}</td><td>${x.need_pct}%</td>`
+      +`<td>${x.reach}×</td><td>${x.p_itm}%</td><td>${x.spread_pct??"–"}%</td><td>${x.oi??"–"}</td>`
+      +`<td>${x.iv?x.iv.toFixed(0)+"%":"–"}${(x.iv_markup_pct??0)>8?" ⚠":""}</td></tr>`;
+  });
+  h+=`</table><div class="hint">`
+    +`<span style="color:var(--green)">■ healthy (${nGood})</span> — breakeven inside the expected move, real liquidity · `
+    +`<span style="color:var(--gold)">■ discount (${nDeal})</span> — cheap IV vs neighbours, but not necessarily a good trade · `
+    +`<span style="color:var(--red)">■ trap (${nBad})</span> — needs an outlier move, or too thin/wide to exit`
+    +`<br>Implied move ±${ev.implied_move_pct}% (ATM straddle) · ${ev.days_to_expiry} days. White outline = the strike you asked about.</div>`;
+  return h;
+}
+$("evalBtn").onclick=()=>{
+  const K=parseFloat($("evalStrike").value)||null;
+  const ev=evaluateChain($("evalSide").value,K,parseFloat($("evalMove").value)||null);
+  if(!ev.error&&!$("evalMove").value&&ev.implied_move_pct) $("evalMove").placeholder=ev.implied_move_pct+"% auto";
+  $("evalOut").innerHTML=verdictHTML(ev,K);
+  if(ev.error){ led("bad"); flashEl($("card-sanity"),"errshake"); SFX.buzzer(); }
+  else if(ev.your_pick){
+    const cls=classifyRow(ev.your_pick);
+    led(cls==="good"?"good":cls==="bad"?"bad":null,5000);
+    if(cls==="good"||cls==="deal") SFX.coin();
+    else { flashEl($("evalOut"),"errshake"); SFX.buzzer(); }
+  }
+};
+/* ---- screenshot -> chain, via a local Ollama vision model ---- */
+function chainToCSV(){
+  const h=["IV Mid","Delta","Open","Open Int","Vol","% Chg","$ Chg","Last","Bid/Sell","Mid","Ask/Buy",
+    "C","Qty","Strike","Qty","P","Bid/Sell","Mid","Ask/Buy","Last","$ Chg","% Chg","Vol","Open Int","Open","Delta","IV Mid"];
+  const f=v=>v==null?"":v;
+  const lines=[h.join(",")];
+  (uploadedChain||chainFromYahoo()||[]).forEach(r=>{
+    const c=r.call||{}, p=r.put||{};
+    lines.push([f(c.iv),"","",f(c.oi),"","","",f(c.mid),f(c.bid),f(c.mid),f(c.ask),
+      "","",r.strike,"","",f(p.bid),f(p.mid),f(p.ask),f(p.mid),"","","",f(p.oi),"","",f(p.iv)].join(","));
+  });
+  const name=($("ticker").value||"chain").toUpperCase()+"_"+($("expiry").value||"chain")+"_chain.csv";
+  const blob=new Blob([lines.join("\n")],{type:"text/csv"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+$("chainCsvBtn").onclick=chainToCSV;
+$("chainDrop").onclick=()=>$("chainFile").click();
+$("chainFile").onchange=e=>{ const f=e.target.files[0]; if(f) f.text().then(ingestChainCSV); };
+["dragenter","dragover"].forEach(ev=>$("chainDrop").addEventListener(ev,e=>{e.preventDefault();$("chainDrop").classList.add("over");}));
+["dragleave","drop"].forEach(ev=>$("chainDrop").addEventListener(ev,e=>{e.preventDefault();$("chainDrop").classList.remove("over");}));
+$("chainDrop").addEventListener("drop",e=>{ const f=e.dataTransfer.files[0]; if(f) f.text().then(ingestChainCSV); });
+function ingestChainCSV(text){
+  const ch=parseChainCSV(text);
+  if(!ch){ failMsg($("chainStatus"),"⚠ Couldn't read that as an option chain — it needs a Strike column with call and put quote columns either side.",$("card-sanity")); return; }
+  uploadedChain=ch;
+  const S=parseFloat($("spotNow").value);
+  const mv=S?impliedMoveAuto(ch,S):null;
+  $("chainStatus").innerHTML=`<span style="color:var(--green)">Chain loaded: ${ch.length} strikes`
+    +(mv?` · ATM straddle implies ±${mv.toFixed(1)}%`:"")+`</span>`;
+  if(mv&&!$("evalMove").value) $("evalMove").value=mv.toFixed(1);
+  $("chainCsvBtn").style.display="block";
+  SFX.coin();
+}
+
+/* ================= Position health check ================= */
+function diagnose(p){
+  const r=(parseFloat($("rate").value)||0)/100, q=(parseFloat($("divy").value)||0)/100;
+  const now=p.asOf??new Date();
+  const S=p.spot??underlyings[p.ticker];
+  const exp=expiryDateTime(p.expiry);
+  const dte=(exp-now)/86400000;
+  const T=Math.max(dte/365,0);
+  const D={p, S, dte:+dte.toFixed(1), issues:[], good:[], needs:[], deadWhen:[], score:100};
+  if(!S){ D.score=null; D.verdict="unknown"; D.issues.push("No stock price available — fetch quotes first."); return D; }
+  const iv=(p.iv??60)/100;
+  const mid=p.mid??0;
+  const basisPer=p.basis!=null&&p.qty? p.basis/Math.abs(p.qty)/100 : null;
+  const intr=p.isCall?Math.max(S-p.strike,0):Math.max(p.strike-S,0);
+  const tv=Math.max(mid-intr,0);
+  const g=T>0?bs(S,p.strike,T,iv,r,q,p.isCall):{delta:0,theta:0,price:intr};
+  // ATM vol for a realistic expected move (wing IV overstates it)
+  const sk=fitSkew(p.ticker,p.expiry,p.isCall,S);
+  const atmIv=sk?sk.at(0):iv;
+  const expMove=S*Math.min(atmIv,iv)*Math.sqrt(T);
+  const expMovePct=expMove/S*100;
+  // required move to model breakeven at expiry (strike +/- what you PAID)
+  const be=basisPer!=null?(p.isCall?p.strike+basisPer:p.strike-basisPer):(p.isCall?p.strike+mid:p.strike-mid);
+  const reqMove=p.isCall?be-S:S-be;
+  const reqPct=reqMove/S*100;
+  const reach=expMove>0?reqMove/expMove:99;
+  // probability the option finishes in the money (risk-neutral N(d2))
+  let probITM=0;
+  if(T>0&&iv>0){
+    const d2=(Math.log(S/p.strike)+(r-q-iv*iv/2)*T)/(iv*Math.sqrt(T));
+    probITM=p.isCall?N(d2):N(-d2);
+  } else probITM=intr>0?1:0;
+  const spread=(p.bid!=null&&p.ask!=null&&mid>0)?(p.ask-p.bid)/mid:null;
+  const burnDays=g.theta<0&&mid>0?mid/-g.theta:Infinity;
+  const plPct=p.basis?((mid*100*Math.abs(p.qty))-p.basis)/p.basis*100:null;
+
+  // ----- scoring -----
+  let s=100;
+  if(intr>0){ D.good.push(`Has real value: $${intr.toFixed(2)} of its $${mid.toFixed(2)} price is intrinsic — money it keeps even if the stock goes nowhere.`); }
+  else { s-=15; }
+  if(probITM>=0.45) D.good.push(`Coin-flip or better: ~${(probITM*100).toFixed(0)}% chance of finishing in the money.`);
+  else if(probITM>=0.20){ s-=10; }
+  else if(probITM>=0.05){ s-=30; D.issues.push(`Long shot: only ~${(probITM*100).toFixed(0)}% chance of finishing in the money.`); }
+  else { s-=55; D.issues.push(`Lottery ticket: under ${Math.max(1,(probITM*100)).toFixed(0)}% chance of finishing in the money.`); }
+  if(reach>0){
+    if(reach<=1) D.good.push(`The move it needs (${reqPct>0?"+":""}${reqPct.toFixed(1)}%) is inside a normal move for this stock (±${expMovePct.toFixed(1)}% by expiry).`);
+    else if(reach<=2){ s-=10; D.issues.push(`Needs a bigger-than-normal move: ${reqPct.toFixed(1)}% vs the typical ±${expMovePct.toFixed(1)}%.`); }
+    else { s-=25; D.issues.push(`Needs ~${(reach).toFixed(1)}× a normal move to break even (${reqPct.toFixed(1)}% vs typical ±${expMovePct.toFixed(1)}%).`); }
+  } else D.good.push(`Already past breakeven — the stock is beyond $${be.toFixed(2)}.`);
+  if(dte<=5&&intr===0){ s-=20; D.issues.push(`Clock problem: ${dte.toFixed(1)} days left and it's all time value — decay is fastest right here.`); }
+  else if(dte>21) D.good.push(`Time on its side: ${Math.round(dte)} days for the thesis to play out.`);
+  if(isFinite(burnDays)&&burnDays<dte&&intr===0){ s-=15; D.issues.push(`Decay outruns the calendar: at $${(-g.theta).toFixed(3)}/day, today's price bleeds out in ~${burnDays.toFixed(0)} days — before expiry even matters.`); }
+  if(spread!=null){
+    if(spread<=0.12) D.good.push(`Easy exit: bid/ask spread is only ${(spread*100).toFixed(0)}% of the price.`);
+    else if(spread>0.3){ s-=10; D.issues.push(`Expensive door: ${(spread*100).toFixed(0)}% spread means you lose that much just getting out.`); }
+  }
+  if(mid>0&&p.bid!=null&&p.bid<=0.01&&intr===0){ s-=20; D.issues.push(`No real buyers: the bid is $${p.bid.toFixed(2)} — the market has mostly written this off.`); }
+  if(plPct!=null&&plPct<=-80){ D.issues.push(`Already down ${(-plPct).toFixed(0)}% — what's left ($${(mid*100*Math.abs(p.qty)).toFixed(0)}) is the real decision, not what you paid.`); }
+  D.score=Math.max(0,Math.round(s));
+  D.verdict=D.score>=70?"healthy":D.score>=40?"struggling":D.score>=15?"critical":"dead";
+
+  // ----- what it needs -----
+  const moveTxt=`${p.ticker} ${p.isCall?"above":"below"} $${be.toFixed(2)} by ${p.expiry} (${p.isCall?"+":"-"}${Math.abs(reqPct).toFixed(1)}% from $${S})`;
+  D.needs.push(`To actually profit: ${moveTxt}.`);
+  if(intr===0){
+    const halfBE=p.isCall?p.strike:p.strike;
+    D.needs.push(`First checkpoint: get ${p.isCall?"above":"below"} the $${p.strike} strike at all — that's a ${(Math.abs(p.isCall?p.strike-S:S-p.strike)/S*100).toFixed(1)}% move.`);
+  }
+  if(iv>1.5) D.needs.push(`It's priced for chaos (${(iv*100).toFixed(0)}% IV) — it needs the move to happen FAST, before volatility cools off and deflates the premium.`);
+
+  // ----- when to call it dead -----
+  if(dte<=5){
+    const lastRealDay=Math.max(1,Math.ceil(dte)-1);
+    const needByThen=p.isCall? S*(1+ (reqPct/100)*0.6) : S*(1-(Math.abs(reqPct)/100)*0.6);
+    if(intr===0) D.deadWhen.push(`If ${p.ticker} isn't ${p.isCall?"near":"down near"} $${p.strike} with a full day left, it's done — the last day's decay erases out-of-the-money hope.`);
+    D.deadWhen.push(`If the bid hits $0.01 with no news pending, that IS the market's verdict.`);
+  }else{
+    D.deadWhen.push(`If ${p.ticker} hasn't moved ${p.isCall?"up":"down"} at all by the halfway point (~${Math.round(dte/2)} days), the odds have roughly halved — reassess.`);
+    D.deadWhen.push(`If the position loses more than half its remaining value on a flat stock day, decay owns it now.`);
+  }
+  if(iv>1.5) D.deadWhen.push(`If IV collapses (big red candle in the option on a flat stock), the chaos premium you bought is gone — that rarely comes back.`);
+
+  Object.assign(D,{iv_pct:+(iv*100).toFixed(0), mid, intrinsic:+intr.toFixed(3), time_value:+tv.toFixed(3),
+    prob_itm_pct:+(probITM*100).toFixed(1), breakeven:+be.toFixed(2), req_move_pct:+reqPct.toFixed(1),
+    typical_move_pct:+expMovePct.toFixed(1), theta_per_day:+g.theta.toFixed(4), delta:+g.delta.toFixed(3),
+    spread_pct:spread!=null?+(spread*100).toFixed(0):null, pl_pct:plPct!=null?+plPct.toFixed(0):null,
+    position_value:+(mid*100*Math.abs(p.qty)).toFixed(0)});
+  return D;
+}
+const VERDICTS={dead:"DEAD ON ARRIVAL",critical:"CRITICAL",struggling:"STRUGGLING",healthy:"HEALTHY",unknown:"NO DATA"};
+function buildDiagHTML(D){
+  const p=D.p;
+  let h=`<h3>${p.ticker} ${p.expiry} $${p.strike} ${p.isCall?"CALL":"PUT"} ×${p.qty}
+    <span class="badge">${VERDICTS[D.verdict]}${D.score!=null?" · "+D.score+"/100":""}</span></h3>`;
+  if(D.score!=null){
+    h+=`<div class="hint">worth $${D.position_value} now · ${D.prob_itm_pct}% chance ITM · needs ${p.isCall?"+":"−"}${Math.abs(D.req_move_pct)}% (typical: ±${D.typical_move_pct}%) · ${D.dte} days left${D.pl_pct!=null?` · P/L ${D.pl_pct}%`:""}</div>`;
+  }
+  if(D.good.length) h+=`<div class="lbl">WHAT'S GOOD</div><ul>${D.good.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+  if(D.issues.length) h+=`<div class="lbl">WHAT'S WRONG</div><ul>${D.issues.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+  if(D.needs.length&&D.verdict!=="dead") h+=`<div class="lbl">WHAT IT NEEDS</div><ul>${D.needs.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+  if(D.deadWhen.length) h+=`<div class="lbl">${D.verdict==="dead"?"WHY IT'S DEAD":"KNOW IT'S DEAD WHEN"}</div><ul>${D.deadWhen.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+  return h;
+}
+function runDiagnosis(){
+  if(!positions.length){ alert("Upload a CSV first."); return []; }
+  const missing=positions.some(p=>!(p.spot??underlyings[p.ticker]));
+  const all=positions.map(diagnose).sort((a,b)=>(a.score??0)-(b.score??0));
+  const box=$("diagList"); box.innerHTML="";
+  all.forEach(D=>{
+    const div=document.createElement("div");
+    div.className="diag "+(D.verdict==="unknown"?"struggling":D.verdict);
+    div.innerHTML=buildDiagHTML(D);
+    box.appendChild(div);
+  });
+  const counts={};
+  all.forEach(D=>counts[D.verdict]=(counts[D.verdict]||0)+1);
+  $("diagCard").style.display="block";
+  if(missing) $("diagList").insertAdjacentHTML("afterbegin",
+    `<div class="hint" style="color:var(--gold); margin-bottom:8px">Some positions have no stock price — click "Fetch quotes + solve IV" for a complete checkup.</div>`);
+  $("diagCard").scrollIntoView({behavior:"smooth"});
+  return all;
+}
+$("diagBtn").onclick=runDiagnosis;
+
+/* ================= retro sound + click feedback ================= */
+let audioOn=true; try{ audioOn=localStorage.getItem("gmeCalcSound")!=="off"; }catch(_){}
+let actx=null;
+function ac(){
+  if(!actx){ try{ const A=window.AudioContext||window.webkitAudioContext; if(A) actx=new A(); }catch(_){} }
+  if(actx&&actx.state==="suspended") actx.resume();
+  return actx;
+}
+function tone(freq,dur,type,vol,when,slideTo){
+  if(!audioOn) return; const c=ac(); if(!c) return;
+  const t0=c.currentTime+(when||0);
+  const o=c.createOscillator(), g=c.createGain();
+  o.type=type||"square"; o.frequency.setValueAtTime(freq,t0);
+  if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo,t0+dur);
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(vol||0.06,t0+0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0+dur+0.03);
+}
+const SFX={
+  click(){ tone(660,0.05,"square",0.045); },
+  select(){ tone(880,0.045,"square",0.04); tone(1175,0.05,"square",0.035,0.045); },
+  coin(){ tone(988,0.06,"square",0.055); tone(1319,0.20,"square",0.055,0.06); },
+  powerup(){ [523,659,784,1047].forEach((f,i)=>tone(f,0.085,"square",0.045,i*0.055)); },
+  levelup(){ [392,523,659,784,1047,1319].forEach((f,i)=>tone(f,0.09,"square",0.04,i*0.048)); },
+  thud(){ tone(150,0.22,"triangle",0.09,0,50); tone(90,0.3,"sine",0.07,0.02,45); },
+  error(){ tone(200,0.16,"sawtooth",0.05,0,120); tone(120,0.26,"sawtooth",0.05,0.15,60); },
+  // the obnoxious one: klaxon buzz + descending "wrong answer" honk
+  buzzer(){
+    [0,0.17].forEach(t=>{ tone(196,0.15,"sawtooth",0.10,t,155); tone(98,0.15,"square",0.09,t,78); });
+    tone(146,0.45,"sawtooth",0.10,0.36,55); tone(73,0.45,"square",0.08,0.36,30);
+  }
+};
+/* type text out character-by-character, with a blinking cursor */
+function typeInto(el,html,speed){
+  if(!el) return;
+  const tmp=document.createElement("div"); tmp.innerHTML=html;
+  const plain=tmp.textContent||"";
+  el.classList.add("typing"); el.textContent="";
+  let i=0;
+  const step=()=>{
+    if(i>=plain.length){ el.classList.remove("typing"); el.innerHTML=html; return; }
+    const jump=Math.max(1,Math.round(plain.length/70));
+    i=Math.min(plain.length,i+jump);
+    el.textContent=plain.slice(0,i);
+    setTimeout(step,speed||14);
+  };
+  step();
+}
+/* one call for every failure: shake, red pop, typewriter, klaxon */
+function failMsg(el,html,shakeEl){
+  if(!el) return;
+  el.className=(el.className||"").replace(/\b(errmsg|okmsg)\b/g,"").trim()+" errmsg";
+  typeInto(el,html);
+  flashEl(shakeEl||el.closest&&el.closest(".card")||el,"errshake");
+  SFX.buzzer();
+}
+function okMsg(el,html){
+  if(!el) return;
+  el.className=(el.className||"").replace(/\b(errmsg|okmsg)\b/g,"").trim()+" okmsg";
+  el.innerHTML=html;
+}
+SFX.fanfare=function(){
+  const notes=[523,659,784,1047,1319,1568];
+  notes.forEach((f,i)=>{ tone(f,0.16,"square",0.05,i*0.075); tone(f/2,0.16,"triangle",0.035,i*0.075); });
+  [1047,1319,1568,2093].forEach((f,i)=>tone(f,0.42,"square",0.05,0.46+i*0.055));
+  tone(1568,0.7,"triangle",0.05,0.66); tone(2093,0.7,"sine",0.035,0.66);
+};
+/* confetti + a rocket doing a victory lap */
+let fxRun=false;
+function celebrate(text,up){
+  const cv=$("fx"); if(!cv||!cv.getContext) return;
+  SFX.fanfare();
+  const b=$("fxBanner");
+  if(b){ b.textContent=text||"LFG"; b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); }
+  if(fxRun) return; fxRun=true;
+  const W=window.innerWidth, H=window.innerHeight, dpr=window.devicePixelRatio||1;
+  cv.style.display="block"; cv.width=W*dpr; cv.height=H*dpr;
+  const ctx=cv.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0);
+  const cols=["#FD0000","#ffc53d","#00e5ff","#ff2f8e","#ffffff","#00e676"];
+  const bits=[];
+  for(let i=0;i<170;i++) bits.push({x:Math.random()*W, y:-20-Math.random()*H*0.5,
+    vx:(Math.random()-0.5)*2.6, vy:2+Math.random()*4.5, s:5+Math.random()*7,
+    rot:Math.random()*6.3, vr:(Math.random()-0.5)*0.3, c:cols[(Math.random()*cols.length)|0],
+    sq:Math.random()<0.5});
+  const rocket={x:-90, y:H*0.62, t:0};
+  const t0=performance.now();
+  (function frame(now){
+    const el=now-t0;
+    ctx.clearRect(0,0,W,H);
+    bits.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.045; p.rot+=p.vr;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.c;
+      if(p.sq) ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6);
+      else { ctx.beginPath(); ctx.ellipse(0,0,p.s/2,p.s/3,0,0,7); ctx.fill(); }
+      ctx.restore(); });
+    if(up){
+      rocket.t+=0.016; rocket.x=-90+(W+200)*(rocket.t/2.2);
+      rocket.y=H*0.62-Math.sin(Math.min(rocket.t/2.2,1)*Math.PI)*H*0.34;
+      ctx.save(); ctx.translate(rocket.x,rocket.y); ctx.rotate(-0.5);
+      ctx.font="52px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      for(let k=1;k<=7;k++){ ctx.globalAlpha=0.11*(8-k)/7;
+        ctx.fillText("🔥",-k*17,k*7); }
+      ctx.globalAlpha=1; ctx.fillText("🚀",0,0); ctx.restore();
+    }
+    if(el<2700) requestAnimationFrame(frame);
+    else { ctx.clearRect(0,0,W,H); cv.style.display="none"; fxRun=false; }
+  })(t0);
+}
+const SFX_BY_ID={calcBtn:"powerup", diagBtn:"levelup", posCalc:"coin", ivBtn:"select",
+  fetchBtn:"select", chatSend:"click", ollamaConn:"click", resetUi:"error"};
+function flashEl(el,cls){ if(!el||!el.classList) return;
+  el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
+  setTimeout(()=>el.classList.remove(cls),400); }
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("button");
+  if(b&&b.id!=="sndBtn"){ flashEl(b,"pressed"); SFX[SFX_BY_ID[b.id]||"click"](); return; }
+  const tr=e.target.closest&&e.target.closest("#posTbl tr, #chainTbl tr");
+  if(tr&&tr.rowIndex!==0){ flashEl(tr,"rowhit"); SFX.select(); }
+},true);
+function setSndIcon(){ const b=$("sndBtn"); if(b){ b.textContent=audioOn?"🔊":"🔇";
+  b.title=audioOn?"Sound on — click to mute":"Muted — click for sound"; } }
+
+/* ================= safe UI customisation ================= */
+const UI_VARS={accent:"--accent", red:"--red", green:"--green", gold:"--gold",
+  panel:"--panel", panel2:"--panel2", background:"--bg", text:"--text", muted:"--muted", border:"--border"};
+const UI_PANELS={live:"card-live", inputs:"card-inputs", results:"results", matrix:"matrixCard",
+  payoff:"payoffCard", positions:"card-positions", health:"diagCard", chat:"card-chat"};
+const UI_FONTS={header:"--head", data:"--data", numbers:"--mono"};
+let uiPrefs={};
+function applyUiPrefs(){
+  const rs=document.documentElement.style;
+  Object.entries(uiPrefs.vars||{}).forEach(([v,val])=>rs.setProperty(v,val));
+  Object.entries(uiPrefs.hidden||{}).forEach(([id,hid])=>{
+    const el=$(id); if(el) el.style.display=hid?"none":"";
+  });
+  Object.entries(uiPrefs.text||{}).forEach(([id,t])=>{ const el=$(id); if(el) el.textContent=t; });
+  if(uiPrefs.fontScale){ document.body.style.fontSize=(uiPrefs.fontScale*100).toFixed(0)+"%"; }
+}
+function saveUiPrefs(){ try{ localStorage.setItem("gmeCalcUI",JSON.stringify(uiPrefs)); }catch(_){} applyUiPrefs(); }
+try{ uiPrefs=JSON.parse(localStorage.getItem("gmeCalcUI")||"{}"); applyUiPrefs(); }catch(_){ uiPrefs={}; }
+
+const UI_TOOLS={
+  set_color(a){
+    const key=(a.target||"").toLowerCase(), val=(a.color||"").trim();
+    if(!UI_VARS[key]) return {error:`unknown target "${a.target}". Valid: ${Object.keys(UI_VARS).join(", ")}`};
+    const okColor=/^#[0-9a-f]{3}$|^#[0-9a-f]{4}$|^#[0-9a-f]{6}$|^#[0-9a-f]{8}$/i.test(val)
+      || /^(rgb|hsl)a?\(\s*[\d.,%\s/]+\)$/i.test(val)
+      || /^[a-z]{3,20}$/i.test(val) && CSS.supports("color",val);
+    if(!okColor) return {error:"color must be a hex code (#RRGGBB), rgb()/hsl(), or a plain CSS colour name"};
+    uiPrefs.vars=uiPrefs.vars||{}; uiPrefs.vars[UI_VARS[key]]=val; saveUiPrefs();
+    return {ok:true, applied:`${key} → ${val}`};
+  },
+  set_font(a){
+    const key=(a.role||"").toLowerCase();
+    if(!UI_FONTS[key]) return {error:`unknown role. Valid: ${Object.keys(UI_FONTS).join(", ")}`};
+    if(!a.font||/[<>{};]/.test(a.font)) return {error:"invalid font name"};
+    uiPrefs.vars=uiPrefs.vars||{}; uiPrefs.vars[UI_FONTS[key]]=`"${a.font}",sans-serif`; saveUiPrefs();
+    return {ok:true, applied:`${key} font → ${a.font}`};
+  },
+  set_text_size(a){
+    const s=parseFloat(a.scale);
+    if(!(s>=0.7&&s<=1.6)) return {error:"scale must be between 0.7 and 1.6"};
+    uiPrefs.fontScale=s; saveUiPrefs();
+    return {ok:true, applied:`text scale ${Math.round(s*100)}%`};
+  },
+  toggle_panel(a){
+    const key=(a.panel||"").toLowerCase();
+    if(!UI_PANELS[key]) return {error:`unknown panel. Valid: ${Object.keys(UI_PANELS).join(", ")}`};
+    const hide=a.show===false||a.hide===true;
+    uiPrefs.hidden=uiPrefs.hidden||{}; uiPrefs.hidden[UI_PANELS[key]]=hide; saveUiPrefs();
+    return {ok:true, applied:`${key} panel ${hide?"hidden":"shown"}`};
+  },
+  rename_label(a){
+    const el=$(a.element_id||"");
+    if(!el) return {error:`no element with id "${a.element_id}". Use list_ui_targets to see valid ids.`};
+    if(!a.text||a.text.length>60) return {error:"text required, max 60 chars"};
+    uiPrefs.text=uiPrefs.text||{}; uiPrefs.text[a.element_id]=a.text; saveUiPrefs();
+    return {ok:true, applied:`"${a.element_id}" → "${a.text}"`};
+  },
+  list_ui_targets(){
+    return {colors:Object.keys(UI_VARS), fonts:Object.keys(UI_FONTS), panels:Object.keys(UI_PANELS),
+      renameable_ids:["h1Title","subTitle","calcBtn","diagBtn","posCalc","ivBtn","fetchBtn","chatSend"],
+      current:uiPrefs};
+  },
+  reset_ui(){ uiPrefs={}; try{ localStorage.removeItem("gmeCalcUI"); }catch(_){}
+    location.reload(); return {ok:true, applied:"reset to defaults, reloading"}; }
+};
+
+/* ================= Ollama chat ================= */
+let chatHist=[];
+function addMsg(role,text){
+  const d=document.createElement("div");
+  d.className="msg "+(role==="user"?"u":"a");
+  d.textContent=text;
+  $("chatLog").appendChild(d);
+  $("chatLog").scrollTop=$("chatLog").scrollHeight;
+  return d;
+}
+$("ollamaConn").onclick=async()=>{
+  const base=$("ollamaUrl").value.replace(/\/$/,"");
+  $("ollamaStatus").textContent="Connecting…"; $("ollamaStatus").className="hint";
+  try{
+    const r=await fetch(base+"/api/tags");
+    const j=await r.json();
+    const sel=$("ollamaModel"); sel.innerHTML="";
+    (j.models||[]).forEach(m=>{ const o=document.createElement("option"); o.value=m.name; o.textContent=m.name; sel.appendChild(o); });
+    if(!sel.options.length){ $("ollamaStatus").textContent="Connected, but no models installed. Run: ollama pull llama3.1"; return; }
+    $("ollamaStatus").innerHTML=`<span style="color:var(--green)">Connected · ${sel.options.length} model(s)</span>`;
+  }catch(e){
+    let up=false;
+    try{ await fetch(base,{mode:"no-cors",signal:AbortSignal.timeout(3000)}); up=true; }catch(_){}
+    if(up){
+      failMsg($("ollamaStatus"), location.protocol==="file:"
+        ? `⚠ Ollama is running, but this page was opened as a FILE — that's why it's blocked. `
+          +`Close this tab and double-click START_CALCULATOR.bat instead; it serves the same page at localhost, which Ollama trusts.`
+        : `⚠ Ollama IS running but blocking this page (CORS). One-time fix: PowerShell → setx OLLAMA_ORIGINS "*" → `
+          +`right-click the Ollama tray icon → Quit → start it again. The tray process must fully restart.`,
+        $("card-chat"));
+    }else{
+      failMsg($("ollamaStatus"),`⚠ Can't reach Ollama at ${base} — it doesn't look like it's running. `
+        +`Open ${base} in a tab; it should say "Ollama is running". If not, start the Ollama app or run: ollama serve`,
+        $("card-chat"));
+    }
+  }
+};
+function buildContext(){
+  const L=[];
+  L.push(`Today: ${new Date().toDateString()}. Next market open: ${nextMarketOpen().toLocaleString()}.`);
+  if(lastCalc){
+    const c=lastCalc, g=c.greeks;
+    L.push(`\nSingle-contract calculation just run by the app (Black-Scholes, authoritative — do not recompute):`);
+    L.push(`${c.ticker} ${c.expiry} ${c.strike ?? ""}${c.K} ${c.isCall?"call":"put"}; stock now $${c.S0}, assumed open $${c.S1}; IV ${(c.ivNow*100).toFixed(1)}% -> ${(c.ivOpen*100).toFixed(1)}%.`);
+    L.push(`Predicted price at open: mid $${c.mid.toFixed(3)}, range $${c.lo.toFixed(3)}-$${c.hi.toFixed(3)}. Current bid ${c.bid ?? "n/a"} ask ${c.ask ?? "n/a"}.`);
+    L.push(`Greeks at open: delta ${g.delta.toFixed(3)}, gamma ${g.gamma.toFixed(4)}, theta/day ${g.theta.toFixed(3)}, vega ${g.vega.toFixed(3)}.`);
+  }
+  if(positions.length){
+    L.push(`\nUploaded positions (qty is contracts; negative = short):`);
+    positions.forEach(p=>L.push(`- ${p.ticker} ${p.expiry} $${p.strike} ${p.isCall?"call":"put"} x${p.qty}`
+      +`, underlying $${p.spot ?? "?"}, mid ${p.mid ?? "n/a"}, IV ${p.iv?p.iv.toFixed(0)+"%":"n/a"}`
+      +`, basis ${p.basis ?? "n/a"}`+(p.timeValue!=null?`, time value $${p.timeValue.toFixed(0)}`:"")
+      +(p.deltaCheck&&!p.deltaCheck.ok?" [WARN: broker Greeks disagree with model; treat Greeks as uncertain]":"")));
+    const S=parseFloat($("posSpot").value);
+    if(S){
+      const res=pricePositions();
+      if(res){
+        L.push(`\nApp-computed scenario at underlying $${S} (authoritative):`);
+        positions.forEach((p,i)=>{ const pr=res.prices[i]; if(pr)
+          L.push(`- ${p.ticker} ${p.strike}${p.isCall?"C":"P"}: $${pr.price.toFixed(3)} each, position value $${pr.val.toFixed(0)}`); });
+        L.push(`Portfolio total $${res.tot.toFixed(0)} vs basis $${res.totBasis.toFixed(0)}.`);
+      }
+    }
+  }
+  return L.join("\n");
+}
+/* ---- tools the model can call to drive the calculator ---- */
+const TOOLS={
+  list_positions(){
+    if(!positions.length) return {error:"No CSV loaded yet."};
+    return {underlyings, positions:positions.map(p=>({ticker:p.ticker,expiry:p.expiry,strike:p.strike,
+      type:p.isCall?"call":"put",qty:p.qty,mid:p.mid,iv_pct:p.iv?+p.iv.toFixed(1):null,basis:p.basis,
+      underlying:p.spot, time_value:p.timeValue, broker_net_delta:p.netDelta, broker_net_theta:p.netTheta,
+      greeks_uncertain:p.deltaCheck?!p.deltaCheck.ok:null}))};
+  },
+  price_option(a){
+    const K=+a.strike, S=+a.spot_at_open, isC=/call/i.test(a.type||"call");
+    const exp=a.expiry, ivp=a.iv_pct!=null?+a.iv_pct:null;
+    if(!K||!S||!exp) return {error:"need strike, spot_at_open, expiry (YYYY-MM-DD)"};
+    let iv=ivp!=null?ivp/100:null;
+    if(iv==null){
+      const m=positions.find(p=>p.strike===K&&p.expiry===exp&&p.isCall===isC);
+      iv=m&&m.iv?m.iv/100:null;
+    }
+    if(!iv) return {error:"no IV known for that contract; run Fetch quotes + solve IV, or pass iv_pct"};
+    const ivStart=iv;
+    let note="held flat";
+    const auto=a.auto_iv!==false && $("autoIv").checked;
+    if(auto){
+      const m0=positions.find(p=>p.strike===K&&p.expiry===exp&&p.isCall===isC);
+      const S0p=m0?.spot??underlyings[(m0?.ticker)||""]??S;
+      const mm=modelIV(m0?.ticker||"",exp,isC,K,S0p,S,iv,parseFloat($("volBeta").value)||0);
+      iv=mm.clamped; note=`skew-adjusted from ${(ivStart*100).toFixed(0)}% (${mm.src}), gap lift +${(mm.lift*100).toFixed(0)}%`;
+    }
+    if(a.iv_change_pct){ iv*=(1+(+a.iv_change_pct)/100); note+=`, manual ${a.iv_change_pct>0?"+":""}${a.iv_change_pct}%`; }
+    const r=(parseFloat($("rate").value)||0)/100, q=(parseFloat($("divy").value)||0)/100;
+    const T=Math.max((expiryDateTime(exp)-nextMarketOpen())/YEAR_MS,0);
+    const o=bs(S,K,T,Math.max(iv,0.01),r,q,isC);
+    let lo=Infinity,hi=-Infinity;
+    for(const s of [S*0.98,S,S*1.02]) for(const v of [iv*0.9,iv,iv*1.1]){
+      const p=bs(s,K,T,Math.max(v,0.01),r,q,isC).price; if(p<lo)lo=p; if(p>hi)hi=p; }
+    return {price_at_open:+o.price.toFixed(3), range:[+lo.toFixed(3),+hi.toFixed(3)],
+      iv_now_pct:+(ivStart*100).toFixed(1), iv_used_pct:+(iv*100).toFixed(1), iv_model:note,
+      days_to_expiry_at_open:+(T*365).toFixed(2),
+      delta:+o.delta.toFixed(3), gamma:+o.gamma.toFixed(4), theta_per_day:+o.theta.toFixed(3), vega:+o.vega.toFixed(3)};
+  },
+  price_portfolio(a){
+    if(!positions.length) return {error:"No CSV loaded yet."};
+    const S=+a.spot_at_open, tk=(a.ticker||"").toUpperCase();
+    if(!S||!tk) return {error:"need ticker and spot_at_open"};
+    const chg=1+((+a.iv_change_pct||0)/100);
+    const r=(parseFloat($("rate").value)||0)/100, q=(parseFloat($("divy").value)||0)/100;
+    const open=nextMarketOpen(); const legs=[]; let tot=0, basis=0, now=0;
+    const auto=a.auto_iv!==false && $("autoIv").checked;
+    const beta=parseFloat($("volBeta").value)||0;
+    positions.filter(p=>p.ticker===tk).forEach(p=>{
+      if(!p.iv) return;
+      const T=Math.max((expiryDateTime(p.expiry)-open)/YEAR_MS,0);
+      let iv=p.iv/100;
+      const S0p=p.spot??underlyings[tk]??S;
+      if(auto) iv=modelIV(p.ticker,p.expiry,p.isCall,p.strike,S0p,S,iv,beta).clamped;
+      const px=bs(S,p.strike,T,Math.max(iv*chg,0.01),r,q,p.isCall).price;
+      const val=px*100*p.qty; tot+=val; basis+=p.basis||0; now+=(p.mid||0)*100*p.qty;
+      legs.push({contract:`${p.strike}${p.isCall?"C":"P"}`,qty:p.qty,price_each:+px.toFixed(3),
+        iv_now_pct:+p.iv.toFixed(0), iv_used_pct:+(iv*chg*100).toFixed(0), value:+val.toFixed(0)});
+    });
+    if(!legs.length) return {error:`no ${tk} contracts with known IV; run Fetch quotes + solve IV first`};
+    return {ticker:tk, spot_at_open:S, legs, total_value:+tot.toFixed(0),
+      cost_basis:+basis.toFixed(0), current_value:+now.toFixed(0), pl_vs_basis:+(tot-basis).toFixed(0)};
+  },
+  diagnose_positions(a){
+    if(!positions.length) return {error:"No CSV loaded yet."};
+    const tk=(a&&a.ticker||"").toUpperCase();
+    const all=runDiagnosis().filter(D=>!tk||D.p.ticker===tk);
+    return {positions:all.map(D=>{
+      const base={contract:`${D.p.ticker} ${D.p.expiry} ${D.p.strike}${D.p.isCall?"C":"P"} x${D.p.qty}`,
+        verdict:D.verdict, days_left:D.dte};
+      if(D.score==null) return {...base, note:"no stock price — fetch quotes first"};
+      return {...base, score:D.score, value:D.position_value, prob_itm_pct:D.prob_itm_pct,
+        breakeven:D.breakeven, needs_move_pct:(D.p.isCall?1:-1)*Math.abs(D.req_move_pct),
+        typical_move_pct:D.typical_move_pct, pl_pct:D.pl_pct,
+        key_problems:D.issues, key_strengths:D.good};
+    })};
+  },
+  ...UI_TOOLS,
+  find_value(a){ return findValue(); },
+  find_anomalies(a){ return findAnomalies(); },
+  find_moonshots(a){ return findMoonshots(a&&a.sigma?+a.sigma:2); },
+  evaluate_trade(a){
+    return evaluateChain(a.side||"call", a.strike!=null?+a.strike:null,
+      a.implied_move_pct!=null?+a.implied_move_pct:null);
+  },
+  set_calculator(a){
+    if(a.ticker) $("ticker").value=a.ticker.toUpperCase();
+    if(a.strike!=null) $("strike").value=a.strike;
+    if(a.expiry) $("expiry").value=a.expiry;
+    if(a.type){ isCall=/call/i.test(a.type);
+      $("tCall").classList.toggle("active",isCall); $("tPut").classList.toggle("active",!isCall); }
+    if(a.spot_now!=null) $("spotNow").value=a.spot_now;
+    if(a.spot_at_open!=null){ $("spotOpen").value=a.spot_at_open; $("posSpot").value=a.spot_at_open; }
+    if(a.iv_pct!=null) $("iv").value=a.iv_pct;
+    if(a.iv_change_pct!=null){ $("ivChg").value=a.iv_change_pct; $("ivChgLbl").textContent=a.iv_change_pct+"%"; }
+    if(a.bid!=null) $("optBid").value=a.bid;
+    if(a.ask!=null) $("optAsk").value=a.ask;
+    $("calcBtn").click();
+    return {ok:true, note:"Calculator inputs updated and recalculated on screen.",
+      result:lastCalc?{mid:+lastCalc.mid.toFixed(3),range:[+lastCalc.lo.toFixed(3),+lastCalc.hi.toFixed(3)]}:null};
+  }
+};
+const TOOLSPEC=`Available tools (call at most one per reply):
+list_positions {}                       -> all uploaded contracts + known stock prices
+price_option {strike, type:"call"|"put", expiry:"YYYY-MM-DD", spot_at_open, iv_pct?, iv_change_pct?}
+price_portfolio {ticker, spot_at_open, iv_change_pct?}
+diagnose_positions {ticker?}             -> health check every position: verdict, score, probabilities, problems
+evaluate_trade {side, strike?, implied_move_pct?} -> sanity-check a strike vs the loaded chain; ranks healthier alternatives
+find_value {}                            -> which contracts are cheap/rich vs the chain's own volatility curve
+find_moonshots {sigma?}                  -> the two best long shots (one call, one put) by payoff per dollar
+find_anomalies {}                        -> unusual volume vs OI, put/call flow, OI walls, max pain, term-structure inversion
+
+UI customisation (changes are saved and persist):
+list_ui_targets {}                       -> what you are allowed to change; ALWAYS call this first for UI requests
+set_color {target, color}                -> e.g. {"target":"accent","color":"#00d1ff"}
+set_font {role, font}                    -> role: header | data | numbers
+set_text_size {scale}                    -> 0.7 to 1.6
+toggle_panel {panel, show}               -> e.g. {"panel":"matrix","show":false}
+rename_label {element_id, text}
+reset_ui {}                              -> undo all UI changes
+set_calculator {ticker?, strike?, type?, expiry?, spot_now?, spot_at_open?, iv_pct?, iv_change_pct?, bid?, ask?}
+                                        -> fills the on-screen calculator and recalculates
+
+To call one, reply with ONLY a fenced block, nothing else:
+\`\`\`tool
+{"name":"price_portfolio","args":{"ticker":"OPEN","spot_at_open":3.0}}
+\`\`\`
+You will then receive TOOL RESULT and should answer the user in plain prose using those numbers.`;
+
+/* JSON schemas so Ollama can use native function calling (far more reliable) */
+const OLLAMA_TOOLS=[
+  ["list_positions","List every option contract the user uploaded, with quantity, cost basis, current price and implied volatility.",{}],
+  ["price_portfolio","THE MAIN TOOL for 'what happens to my X positions if the stock opens at Y'. Prices every contract the user owns for one ticker at a hypothetical opening price and returns each leg's value plus the portfolio total and P/L.",
+    {ticker:["string","Ticker symbol, e.g. OPEN or GME"],spot_at_open:["number","Hypothetical stock price at the open"],iv_change_pct:["number","Optional extra IV change in percent, e.g. -40 for earnings crush"]},["ticker","spot_at_open"]],
+  ["price_option","Price ONE specific contract the user names explicitly (not their whole position).",
+    {strike:["number","Strike price"],type:["string","call or put"],expiry:["string","Expiry date as YYYY-MM-DD"],spot_at_open:["number","Stock price at the open"],iv_pct:["number","Optional IV override in percent"],iv_change_pct:["number","Optional extra IV change in percent"]},["strike","type","expiry","spot_at_open"]],
+  ["diagnose_positions","Health check: which positions are healthy, struggling, critical or dead, with probabilities and the move each needs.",
+    {ticker:["string","Optional ticker filter"]}],
+  ["find_value","Scan the loaded option chain for contracts trading BELOW the chain's own fitted volatility curve — i.e. discounted relative to their neighbours — plus put-call parity gaps. Use when the user asks which options are cheap, discounted, mispriced or good value.",{}],
+  ["find_anomalies","Scan the loaded chain for the anomalies desks watch: strikes where volume exceeds open interest (fresh positioning), today's put/call flow balance, open-interest walls and max pain, and term-structure inversion signalling a scheduled catalyst. Use when the user asks what's unusual, what the flow says, or whether something is going on.",{}],
+  ["find_moonshots","Find the two best long-shot lottery tickets on the loaded chain (one call, one put): biggest payoff per dollar at a 2-sigma move, adjusted for the odds and filtered to contracts with a real bid. Use when the user asks for moonshots, lottery tickets, YOLOs or cheap long shots.",{sigma:["number","How many standard deviations to target, default 2"]}],
+  ["evaluate_trade","Sanity-check a contemplated OTM option buy against the loaded option chain: breakeven vs implied move, P(ITM), spread, open interest, IV markup vs neighbouring strikes, and healthier alternatives. Use when the user asks which strike to buy or whether a strike is a good idea.",
+    {side:["string","call or put"],strike:["number","Strike being considered (optional — omit to rank the whole side)"],implied_move_pct:["number","Optional implied move override in percent"]},["side"]],
+  ["set_calculator","Fill the on-screen calculator form with a contract and recalculate it. Use ONLY when the user asks to load or set up the calculator, never to answer a pricing question.",
+    {ticker:["string","Ticker"],strike:["number","Strike"],type:["string","call or put"],expiry:["string","YYYY-MM-DD"],spot_at_open:["number","Expected open price"],iv_pct:["number","IV percent"],iv_change_pct:["number","IV change percent"]}],
+  ["list_ui_targets","List which colours, fonts and panels can be changed. Call before any appearance change.",{}],
+  ["set_color","Change an interface colour.",{target:["string","One of: accent, red, green, gold, panel, panel2, background, text, muted, border"],color:["string","Hex code like #00d1ff, or a CSS colour name"]},["target","color"]],
+  ["set_font","Change a font.",{role:["string","header, data or numbers"],font:["string","Font family name"]},["role","font"]],
+  ["set_text_size","Scale all text.",{scale:["number","0.7 to 1.6"]},["scale"]],
+  ["toggle_panel","Show or hide a panel.",{panel:["string","live, inputs, results, matrix, payoff, positions, health or chat"],show:["boolean","true to show, false to hide"]},["panel","show"]],
+  ["rename_label","Change a button or heading's text.",{element_id:["string","Element id"],text:["string","New text"]},["element_id","text"]],
+  ["reset_ui","Undo all appearance changes.",{}],
+].map(([name,description,props,required])=>({type:"function",function:{name,description,
+  parameters:{type:"object",properties:Object.fromEntries(Object.entries(props||{}).map(([k,[t,d]])=>[k,{type:t,description:d}])),
+    required:required||[]}}}));
+
+/* Text-protocol fallback for models that ignore native tools.
+   Accepts ```tool {...}```, ```toolname {...}```, bare {"name":..,"args":..}, and tool_name {...} */
+const TOOLNAMES=OLLAMA_TOOLS.map(t=>t.function.name);
+function extractToolCall(txt){
+  if(!txt) return null;
+  const tryParse=(name,body)=>{
+    try{ const a=body?JSON.parse(body):{};
+      if(name&&TOOLNAMES.includes(name)) return {name,args:a.args||a.parameters||a.arguments||a};
+      if(a.name&&TOOLNAMES.includes(a.name)) return {name:a.name,args:a.args||a.parameters||a.arguments||{}};
+    }catch(_){}
+    return null;
+  };
+  // ```<fence-tag> {json}```
+  let m=txt.match(/```([\w-]*)\s*([\s\S]*?)```/);
+  if(m){
+    const tag=m[1].trim(), body=m[2].trim();
+    const r=tryParse(TOOLNAMES.includes(tag)?tag:null,body); if(r) return r;
+    const inner=body.match(/\{[\s\S]*\}/);
+    if(inner){ const r2=tryParse(TOOLNAMES.includes(tag)?tag:null,inner[0]); if(r2) return r2; }
+  }
+  // bare  tool_name {json}
+  for(const n of TOOLNAMES){
+    const re=new RegExp(n+"\\s*[:(]?\\s*(\\{[\\s\\S]*?\\})");
+    const mm=txt.match(re);
+    if(mm){ const r=tryParse(n,mm[1]); if(r) return r; }
+  }
+  const j=txt.match(/\{[\s\S]*"name"[\s\S]*\}/);
+  return j?tryParse(null,j[0]):null;
+}
+// Non-streaming call with native tools; returns {text, call}
+async function ollamaCall(model,messages,useTools){
+  const body={model, stream:false, messages};
+  if(useTools) body.tools=OLLAMA_TOOLS;
+  const r=await fetch($("ollamaUrl").value.replace(/\/$/,"")+"/api/chat",{
+    method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error("HTTP "+r.status+(r.status===400?" (model may not support tools — retrying without)":""));
+  const j=await r.json();
+  const msg=j.message||{};
+  let call=null;
+  const tc=msg.tool_calls&&msg.tool_calls[0];
+  if(tc&&tc.function){
+    let a=tc.function.arguments;
+    if(typeof a==="string"){ try{ a=JSON.parse(a); }catch(_){ a={}; } }
+    call={name:tc.function.name, args:a||{}};
+  }
+  if(!call) call=extractToolCall(msg.content||"");
+  return {text:msg.content||"", call, raw:msg};
+}
+async function send(){
+  const q=$("chatIn").value.trim(); if(!q) return;
+  const model=$("ollamaModel").value;
+  if(!model){ failMsg($("ollamaStatus"),"⚠ Connect and pick a model first.",$("card-chat")); return; }
+  $("chatIn").value=""; addMsg("user",q);
+  const sys=`You are an options analyst embedded in the user's options calculator.
+
+CRITICAL RULES:
+1. You have NO ability to compute option prices. You MUST call a tool for any number.
+2. NEVER write "TOOL RESULT" yourself. Never invent prices, Greeks or P/L. If you have not received
+   a real tool result, say you need to run the tool — do not guess.
+3. "What happens to my <ticker> positions if it opens at X" -> call price_portfolio.
+   Only use set_calculator when the user explicitly asks to load something into the on-screen form.
+4. After a tool returns, answer in plain prose using ONLY the returned numbers.
+5. You are not a financial advisor; do not tell the user to buy or sell.
+
+${TOOLSPEC}
+
+CURRENT STATE:
+${buildContext()}`;
+  chatHist.push({role:"user",content:q});
+  const el=addMsg("assistant","…");
+  let useTools=true;
+  try{
+    let msgs=[{role:"system",content:sys},...chatHist.slice(-8)];
+    for(let hop=0; hop<4; hop++){
+      let out;
+      try{ out=await ollamaCall(model,msgs,useTools); }
+      catch(err){
+        if(useTools){ useTools=false; el.textContent="(model doesn't support tool calling — using text mode)"; continue; }
+        throw err;
+      }
+      if(!out.call){
+        // guard against a model that fabricates tool output
+        let txt=out.text||"";
+        if(/TOOL RESULT/i.test(txt)){
+          msgs=[...msgs,{role:"assistant",content:txt},
+            {role:"user",content:"You wrote a TOOL RESULT yourself. That is not allowed — those numbers are invented. Call the appropriate tool properly instead, and wait for the real result."}];
+          el.textContent="⚠ model invented a result — retrying with a real tool call…";
+          continue;
+        }
+        chatHist.push({role:"assistant",content:txt});
+        el.textContent=txt||"(empty response)"; return;
+      }
+      const call=out.call;
+      el.textContent=`⚙ running ${call.name}(${JSON.stringify(call.args||{})})…`;
+      let res;
+      try{ res=TOOLS[call.name]? TOOLS[call.name](call.args||{}) : {error:"unknown tool "+call.name+". Valid: "+TOOLNAMES.join(", ")}; }
+      catch(err){ res={error:String(err.message||err)}; }
+      lastToolRun={name:call.name,args:call.args,result:res};
+      msgs=[...msgs,
+        {role:"assistant",content:out.text||"",tool_calls:out.raw?.tool_calls},
+        {role:"tool",name:call.name,content:JSON.stringify(res)},
+        {role:"user",content:`Those are the REAL numbers from ${call.name}. Answer my question in plain prose using only them. Do not call another tool unless essential.`}];
+    }
+    el.textContent="Stopped after several tool calls without a final answer — try rephrasing.";
+  }catch(e){
+    el.textContent="Error: "+e.message+". Make sure Ollama is running and reachable.";
+  }
+}
+let lastToolRun=null;
+$("chatSend").onclick=send;
+$("chatIn").addEventListener("keydown",e=>{ if(e.key==="Enter") send(); });
+if(location.protocol==="file:") $("fileWarn").style.display="block";
+$("resetUi").onclick=e=>{ e.preventDefault(); UI_TOOLS.reset_ui(); };
+setSndIcon();
+$("sndBtn").onclick=()=>{
+  audioOn=!audioOn;
+  try{ localStorage.setItem("gmeCalcSound",audioOn?"on":"off"); }catch(_){}
+  setSndIcon(); if(audioOn) SFX.coin();
+};
+</script>
+</body>
+</html>

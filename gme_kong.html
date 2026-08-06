@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQUEEZE KONG — Power to the Players</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#FD0000; --gold:#ffb300; --green:#00c853; --head:"Oswald","Arial Black",sans-serif; --mono:"Roboto Mono",Consolas,monospace;}
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:#0a0a0a; color:#fff; font-family:var(--mono); min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;}
+  .topbar{width:100%; display:flex; align-items:center; justify-content:space-between;
+    background:linear-gradient(180deg,#161616,#000 65%); border-bottom:4px solid var(--red);
+    box-shadow:0 4px 18px rgba(0,0,0,.45); margin-bottom:16px;}
+  .logo{display:flex; align-items:center; font-family:var(--head); font-weight:700; font-size:1.4rem;
+    letter-spacing:.5px; text-transform:uppercase; flex:0 0 auto; white-space:nowrap;
+    position:relative; overflow:hidden;}
+  .logo .blk{color:#fff; padding:12px 8px 12px 22px;}
+  .logo .red{background:var(--red); color:#fff; padding:12px 14px; margin-left:4px;}
+  .logo::after{content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(115deg, transparent 32%, color-mix(in srgb, var(--gold) 38%, transparent) 50%, transparent 68%);
+    transform:translateX(-130%); animation:sheen 6s ease-in-out infinite;}
+  @keyframes sheen{0%,74%{transform:translateX(-130%);} 90%,100%{transform:translateX(130%);}}
+  .tag{padding-right:22px; font-family:var(--head); letter-spacing:3px; font-size:.75rem;
+    text-transform:uppercase; display:flex; align-items:center; gap:14px;}
+  .tag b{color:var(--red); margin-right:6px;}
+  #exitBtn{font:inherit; font-size:.7rem; letter-spacing:1.5px; cursor:pointer; color:#fff;
+    background:linear-gradient(180deg,#1c1c1c,#000); border:1px solid #444; border-radius:10px;
+    padding:7px 13px; transition:border-color .2s ease, background .2s ease, box-shadow .2s ease;}
+  #exitBtn:hover{border-color:var(--red); background:linear-gradient(180deg,#2a0000,#120000);
+    box-shadow:0 0 16px color-mix(in srgb, var(--red) 45%, transparent);}
+  @property --spin{syntax:"<angle>"; inherits:false; initial-value:0deg;}
+  .frame{position:relative; border-radius:18px; padding:10px; background:#000;
+    box-shadow:0 12px 40px rgba(0,0,0,.6);}
+  .frame::before{content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:conic-gradient(from var(--spin), var(--red), var(--gold) 25%, transparent 55%, var(--red));
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite:exclude; animation:spinb 9s linear infinite; opacity:.6; pointer-events:none;}
+  @keyframes spinb{to{--spin:360deg;}}
+  .crt{position:relative; border-radius:12px; overflow:hidden;}
+  .crt::after{content:""; position:absolute; inset:0; pointer-events:none; z-index:2;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px);}
+  .crt::before{content:""; position:absolute; inset:0; pointer-events:none; z-index:1;
+    background:radial-gradient(ellipse at center, transparent 62%, rgba(0,0,0,.4));}
+  canvas{display:block; background:#050505; border-radius:12px;}
+  .hint{color:#9aa0a6; font-size:.72rem; margin:10px 0 20px; text-align:center; letter-spacing:.5px;}
+  .hint b{color:#fff;}
+  @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo"><span class="blk">GameStop</span><span class="red">Squeeze Kong</span></div>
+  <div class="tag"><b>■</b> Power to the Players
+    <button id="exitBtn" title="Back to the calculator (Esc)">✕ EXIT TO CALCULATOR</button>
+  </div>
+</div>
+<div class="frame"><div class="crt"><canvas id="cv" width="900" height="640"></canvas></div></div>
+<div class="hint"><b>←→</b> move · <b>↑↓</b> climb ladders · <b>SPACE</b> jump · <b>P</b> pause · <b>M</b> mute · <b>ENTER</b> start · <b>ESC</b> exit</div>
+<script>
+"use strict";
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+const W=cv.width, H=cv.height, TAU=Math.PI*2;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+
+/* ---------- sound ---------- */
+let audioOn=true, AC=null;
+function ac(){ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); return AC; }
+function tone(f,dur,type="square",vol=0.04,delay=0,slide=0){
+  if(!audioOn) return;
+  try{ const c=ac(), o=c.createOscillator(), g=c.createGain(), t=c.currentTime+delay;
+    o.type=type; o.frequency.setValueAtTime(f,t);
+    if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(slide,1),t+dur);
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur+0.02);
+  }catch(_){}}
+const SFX={
+  jump(){ tone(420,0.12,"square",0.035,0,760); },
+  hop(){ tone(880,0.07,"square",0.03); tone(1174,0.1,"square",0.03,0.06); },
+  coin(){ tone(988,0.08,"square",0.045); tone(1319,0.18,"square",0.045,0.08); },
+  smash(){ tone(180,0.14,"sawtooth",0.05,0,60); tone(320,0.1,"square",0.04,0.05); },
+  hammer(){ [523,659,784,1047].forEach((f,i)=>tone(f,0.08,"square",0.04,i*0.06)); },
+  die(){ tone(320,0.2,"sawtooth",0.06,0,80); tone(140,0.45,"sawtooth",0.06,0.16,30); },
+  win(){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,0.13,"square",0.045,i*0.1)); },
+  throw_(){ tone(260,0.1,"triangle",0.03,0,150); },
+  climb(){ tone(300,0.04,"square",0.018); },
+};
+
+/* ---------- level geometry ---------- */
+// 6 girders, alternating slope so barrels roll back and forth like the arcade original
+const LEFT=40, RIGHT=W-40, NG=6;
+const girders=[], ladders=[];
+function buildLevel(){
+  girders.length=0; ladders.length=0;
+  const baseY=[600,505,410,315,220,130];
+  for(let i=0;i<NG;i++){
+    const dir=(i%2===0)?1:-1;              // +1 = downhill to the right
+    const drop=i===NG-1?0:18;              // top girder is flat (bear's platform)
+    girders.push({i, x1:LEFT, x2:RIGHT, y1:baseY[i]-(dir>0?drop:0), y2:baseY[i]-(dir>0?0:drop), dir});
+  }
+  // ladders connect girder i (lower) to girder i+1 (upper)
+  const spots=[[0.72],[0.24],[0.66],[0.30],[0.58,0.82]];
+  spots.forEach((xs,i)=>xs.forEach(f=>{
+    const x=LEFT+(RIGHT-LEFT)*f;
+    ladders.push({x, yBot:gy(i,x), yTop:gy(i+1,x), lo:i, hi:i+1});
+  }));
+}
+function gy(i,x){ const g=girders[i]; if(!g) return H;
+  const t=clamp((x-g.x1)/(g.x2-g.x1),0,1); return g.y1+(g.y2-g.y1)*t; }
+function ladderAt(x,y){
+  return ladders.find(L=>Math.abs(L.x-x)<14 && y>=L.yTop-16 && y<=L.yBot+16);
+}
+
+/* ---------- state ---------- */
+let state="menu", score=0, lives=3, level=1, hi=0, bonus=5000;
+try{ hi=+localStorage.getItem("gmeKongHi")||0; }catch(_){}
+let hero, barrels, coins, hammers, parts, popups, bear, spawnT, frame=0, shake=0, hammerT=0, winT=0;
+
+function newHero(){ return {x:LEFT+26, y:gy(0,LEFT+26), vy:0, w:20, h:26, lvl:0,
+  onLadder:false, jumping:false, face:1, walk:0}; }
+function startLevel(n){
+  level=n; buildLevel(); hero=newHero();
+  barrels=[]; parts=[]; popups=[]; bonus=5000;
+  bear={x:LEFT+90, y:gy(NG-1,LEFT+90), anim:0, throwT:60};
+  spawnT=90; hammerT=0; winT=0;
+  coins=[{x:LEFT+(RIGHT-LEFT)*0.45,lvl:1},{x:LEFT+(RIGHT-LEFT)*0.7,lvl:2},
+         {x:LEFT+(RIGHT-LEFT)*0.35,lvl:3},{x:LEFT+(RIGHT-LEFT)*0.75,lvl:4}]
+        .map(c=>({...c, y:gy(c.lvl,c.x)-16, got:false, t:rnd(0,TAU)}));
+  hammers=[{x:LEFT+(RIGHT-LEFT)*0.14, lvl:1},{x:LEFT+(RIGHT-LEFT)*0.5, lvl:3}]
+        .map(h=>({...h, y:gy(h.lvl,h.x)-18, got:false}));
+}
+function reset(){ score=0; lives=3; startLevel(1); }
+function boom(x,y,n,col){ for(let i=0;i<n;i++){ const a=rnd(0,TAU), sp=rnd(0.5,3.5);
+  parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1,life:rnd(18,40),col}); } }
+function popup(x,y,txt,col){ popups.push({x,y,txt,col:col||"#fff",life:60}); }
+function addScore(n,x,y,label){ score+=n; if(x!=null) popup(x,y,label||("+$"+n),"#00c853"); }
+
+/* ---------- barrels ---------- */
+function throwBarrel(){
+  const g=girders[NG-1];
+  barrels.push({x:bear.x+26, y:g.y1-14, lvl:NG-1, vx:2.0+level*0.18, r:11,
+    onLadder:false, rot:0, wild:Math.random()<0.15+level*0.03});
+  SFX.throw_();
+}
+function updateBarrels(){
+  for(let i=barrels.length-1;i>=0;i--){
+    const b=barrels[i];
+    if(b.onLadder){
+      b.y+=2.2; b.rot+=0.12;
+      if(b.y>=gy(b.lvl-1,b.x)-b.r){ b.lvl--; b.onLadder=false; b.y=gy(b.lvl,b.x)-b.r;
+        b.dirOverride=girders[b.lvl].dir; }
+      continue;
+    }
+    const g=girders[b.lvl];
+    const dir=g.dir>=0?1:-1;                    // roll downhill
+    b.x+=dir*b.vx; b.rot+=dir*0.14;
+    b.y=gy(b.lvl,b.x)-b.r;
+    // take a ladder down sometimes
+    if(b.lvl>0){
+      const L=ladders.find(L=>L.hi===b.lvl&&Math.abs(L.x-b.x)<4);
+      if(L&&Math.random()<(b.wild?0.55:0.25)){ b.onLadder=true; b.x=L.x; continue; }
+    }
+    // fell off the end -> drop to the girder below
+    if(b.x<LEFT-6||b.x>RIGHT+6){
+      if(b.lvl===0){ barrels.splice(i,1); continue; }
+      b.lvl--; b.x=clamp(b.x,LEFT+4,RIGHT-4); b.y=gy(b.lvl,b.x)-b.r;
+    }
+  }
+}
+
+/* ---------- input ---------- */
+const keys={};
+function exitGame(){
+  try{ if(window.opener&&!window.opener.closed){ window.close(); return; } }catch(_){}
+  if(history.length>1) history.back(); else location.href="index.html";
+  setTimeout(()=>{ try{ window.close(); }catch(_){} },150);
+}
+document.getElementById("exitBtn").onclick=exitGame;
+addEventListener("keydown",e=>{
+  if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"," "].includes(e.key)) e.preventDefault();
+  keys[e.key.toLowerCase()]=true; keys[e.key]=true;
+  if(e.key==="Enter"&&(state==="menu"||state==="over")){ reset(); state="play"; SFX.hammer(); }
+  if(e.key.toLowerCase()==="p"&&(state==="play"||state==="pause")) state=state==="play"?"pause":"play";
+  if(e.key.toLowerCase()==="m") audioOn=!audioOn;
+  if(e.key==="Escape"){ if(state==="play") state="pause"; else exitGame(); }
+});
+addEventListener("keyup",e=>{ keys[e.key.toLowerCase()]=false; keys[e.key]=false; });
+
+/* ---------- update ---------- */
+function update(){
+  frame++;
+  if(state!=="play") return;
+  if(winT>0){ if(--winT===0){ startLevel(level+1); } return; }
+  const h=hero;
+  const L=ladderAt(h.x,h.y);
+  // ladder climbing
+  if(L&&(keys["arrowup"]||keys["w"])&&h.y>L.yTop){ h.onLadder=true; h.jumping=false; h.vy=0;
+    h.x=L.x; h.y-=2.2; if(frame%8===0) SFX.climb(); }
+  else if(L&&(keys["arrowdown"]||keys["s"])&&h.y<L.yBot){ h.onLadder=true; h.jumping=false; h.vy=0;
+    h.x=L.x; h.y+=2.2; if(frame%8===0) SFX.climb(); }
+  else if(h.onLadder){
+    // step off at either end
+    if(L&&h.y<=L.yTop+2){ h.onLadder=false; h.lvl=L.hi; h.y=gy(h.lvl,h.x); }
+    else if(L&&h.y>=L.yBot-2){ h.onLadder=false; h.lvl=L.lo; h.y=gy(h.lvl,h.x); }
+    else if(!L){ h.onLadder=false; }
+  }
+  if(!h.onLadder){
+    // walking
+    let mv=0;
+    if(keys["arrowleft"]||keys["a"]){ mv=-1; h.face=-1; }
+    if(keys["arrowright"]||keys["d"]){ mv=1; h.face=1; }
+    if(mv){ h.x=clamp(h.x+mv*2.6,LEFT+10,RIGHT-10); h.walk+=0.25; }
+    // jump
+    if((keys[" "]||keys["spacebar"])&&!h.jumping){ h.jumping=true; h.vy=-7.2; SFX.jump(); h.jumpedOver=new Set(); }
+    if(h.jumping){
+      h.vy+=0.42; h.y+=h.vy;
+      const ground=gy(h.lvl,h.x);
+      if(h.vy>0&&h.y>=ground){ h.y=ground; h.jumping=false; h.vy=0; }
+    } else h.y=gy(h.lvl,h.x);
+  }
+  // hammer timer
+  if(hammerT>0) hammerT--;
+  // bonus countdown (your position bleeding theta while you climb)
+  if(frame%18===0&&bonus>0) bonus=Math.max(0,bonus-100);
+  // bear throws
+  bear.anim+=0.06;
+  if(--bear.throwT<=0){ throwBarrel(); bear.throwT=Math.max(38,120-level*9); }
+  updateBarrels();
+  // pickups
+  coins.forEach(c=>{ c.t+=0.08;
+    if(!c.got&&Math.abs(c.x-hero.x)<20&&Math.abs(c.y-(hero.y-13))<24){
+      c.got=true; addScore(500,c.x,c.y,"+$500"); SFX.coin(); } });
+  hammers.forEach(m=>{
+    if(!m.got&&Math.abs(m.x-hero.x)<20&&Math.abs(m.y-(hero.y-13))<26){
+      m.got=true; hammerT=480; popup(m.x,m.y,"🔨 BUY BUTTON","#ffb300"); SFX.hammer(); } });
+  // barrel interactions
+  for(let i=barrels.length-1;i>=0;i--){
+    const b=barrels[i];
+    const dx=Math.abs(b.x-hero.x), dy=Math.abs(b.y-(hero.y-13));
+    if(hammerT>0&&dx<26&&dy<28){
+      barrels.splice(i,1); boom(b.x,b.y,12,"#FD0000"); addScore(300,b.x,b.y,"+$300"); SFX.smash(); continue; }
+    if(dx<16&&dy<17){ die(); return; }
+    // points for hopping a barrel
+    if(hero.jumping&&hero.jumpedOver&&!hero.jumpedOver.has(b)&&dx<22&&b.y>hero.y+6){
+      hero.jumpedOver.add(b); addScore(100,hero.x,hero.y-30,"+$100"); SFX.hop(); }
+  }
+  // reached the vault at the top
+  if(hero.lvl===NG-1&&hero.x>RIGHT-120){
+    addScore(bonus+2000,hero.x,hero.y-40,"SQUEEZE! +$"+(bonus+2000));
+    SFX.win(); winT=110; boom(hero.x,hero.y-20,40,"#ffb300");
+  }
+  parts=parts.filter(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.14; return --p.life>0; });
+  popups=popups.filter(p=>{ p.y-=0.6; return --p.life>0; });
+  if(shake>0) shake--;
+}
+function die(){
+  lives--; boom(hero.x,hero.y-12,26,"#FD0000"); SFX.die(); shake=14;
+  popup(hero.x,hero.y-34,"PAPER HANDED","#FD0000");
+  if(lives<=0){ state="over";
+    if(score>hi){ hi=score; try{ localStorage.setItem("gmeKongHi",String(hi)); }catch(_){}}
+  } else { hero=newHero(); barrels=[]; hammerT=0; }
+}
+
+/* ---------- draw ---------- */
+function px(x,y,w,h,c){ ctx.fillStyle=c; ctx.fillRect(Math.round(x),Math.round(y),w,h); }
+function drawGirders(){
+  girders.forEach(g=>{
+    ctx.save(); ctx.lineCap="round";
+    ctx.strokeStyle="#FD0000"; ctx.lineWidth=9;
+    ctx.beginPath(); ctx.moveTo(g.x1,g.y1); ctx.lineTo(g.x2,g.y2); ctx.stroke();
+    ctx.strokeStyle="rgba(255,255,255,.22)"; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(g.x1,g.y1-3); ctx.lineTo(g.x2,g.y2-3); ctx.stroke();
+    // rivets
+    ctx.fillStyle="#5e0000";
+    for(let x=g.x1+14;x<g.x2;x+=34){ const t=(x-g.x1)/(g.x2-g.x1);
+      ctx.beginPath(); ctx.arc(x,g.y1+(g.y2-g.y1)*t+1,1.7,0,TAU); ctx.fill(); }
+    ctx.restore();
+  });
+}
+function drawLadders(){
+  ladders.forEach(L=>{
+    ctx.strokeStyle="#7fe7ff"; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(L.x-8,L.yTop); ctx.lineTo(L.x-8,L.yBot);
+    ctx.moveTo(L.x+8,L.yTop); ctx.lineTo(L.x+8,L.yBot); ctx.stroke();
+    ctx.lineWidth=2;
+    for(let y=L.yTop+8;y<L.yBot;y+=13){ ctx.beginPath(); ctx.moveTo(L.x-8,y); ctx.lineTo(L.x+8,y); ctx.stroke(); }
+  });
+}
+function drawHero(){
+  const h=hero, x=Math.round(h.x), y=Math.round(h.y);
+  const bob=(!h.onLadder&&!h.jumping&&Math.sin(h.walk)>0)?1:0;
+  // legs
+  px(x-7,y-8+bob,5,8,"#1b3a8f"); px(x+2,y-8-bob,5,8,"#1b3a8f");
+  // body / cat tee
+  px(x-8,y-20,16,13,"#ffffff");
+  px(x-8,y-16,16,4,"#FD0000");
+  ctx.fillStyle="#111"; ctx.font="8px serif"; ctx.textAlign="center"; ctx.fillText("🐱",x,y-10);
+  // arms
+  const arm=hammerT>0?-6:0;
+  px(x-12,y-19+arm,4,9,"#f0c090"); px(x+8,y-19-arm,4,9,"#f0c090");
+  // head + red headband
+  px(x-6,y-31,12,11,"#f0c090");
+  px(x-7,y-32,14,4,"#FD0000");         // headband
+  px(x+5,y-30,4,2,"#FD0000");          // headband tail
+  px(x-4,y-27,2,2,"#111"); px(x+2,y-27,2,2,"#111");
+  if(hammerT>0){ // buy button hammer
+    const hx=x+h.face*16, hy=y-26+(Math.sin(frame*0.4)>0?-6:2);
+    px(hx-2,hy,4,12,"#8a5a2b"); px(hx-9,hy-8,18,9,"#00c853");
+    ctx.fillStyle="#003a17"; ctx.font="bold 7px monospace"; ctx.textAlign="center"; ctx.fillText("BUY",hx,hy-1);
+  }
+}
+function drawBear(){
+  const x=Math.round(bear.x), y=Math.round(bear.y), sway=Math.sin(bear.anim)*2;
+  // arms up when about to throw
+  const wind=bear.throwT<18;
+  px(x-30+sway,y-46,60,40,"#4a3020");            // torso
+  px(x-24+sway,y-40,48,26,"#6b452c");            // belly
+  // pinstripe suit hint
+  ctx.strokeStyle="rgba(255,255,255,.18)"; ctx.lineWidth=1;
+  for(let i=-26;i<26;i+=7){ ctx.beginPath(); ctx.moveTo(x+i+sway,y-46); ctx.lineTo(x+i+sway,y-14); ctx.stroke(); }
+  px(x-34+sway,wind?y-62:y-42,12,22,"#4a3020");  // left arm
+  px(x+22+sway,wind?y-62:y-42,12,22,"#4a3020");  // right arm
+  px(x-18+sway,y-70,36,26,"#5a3a26");            // head
+  px(x-12+sway,y-58,24,12,"#8b6142");            // muzzle
+  px(x-9+sway,y-54,3,3,"#111"); px(x+6+sway,y-54,3,3,"#111");
+  px(x-6+sway,y-50,12,3,"#2b1a10");              // scowl
+  // rainbow headband (mirrors the hero's red one)
+  const bands=["#FD0000","#ff8a00","#ffd400","#00c853","#2b7fff","#8a2be2"];
+  bands.forEach((c,i)=>px(x-19+sway,y-72+i*1.1,38,1.4,c));
+  px(x-32+sway,y-14,16,10,"#3a2418"); px(x+16+sway,y-14,16,10,"#3a2418"); // feet
+  ctx.fillStyle="#9aa0a6"; ctx.font="bold 10px Consolas,monospace"; ctx.textAlign="center";
+  ctx.fillText("THE BIG SHORT BEAR",x+sway,y-80);
+}
+function drawBarrel(b){
+  ctx.save(); ctx.translate(b.x,b.y); ctx.rotate(b.rot);
+  const g=ctx.createLinearGradient(-b.r,0,b.r,0);
+  g.addColorStop(0,"#7a0000"); g.addColorStop(.5,"#FD0000"); g.addColorStop(1,"#5e0000");
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,b.r,0,TAU); ctx.fill();
+  ctx.strokeStyle="rgba(0,0,0,.6)"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(-b.r,-4); ctx.lineTo(b.r,-4); ctx.moveTo(-b.r,4); ctx.lineTo(b.r,4); ctx.stroke();
+  ctx.fillStyle=b.wild?"#ffb300":"rgba(255,255,255,.75)";
+  ctx.font="bold 9px Consolas,monospace"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText("SHORT",0,0);
+  ctx.restore();
+}
+function drawVault(){
+  const g=girders[NG-1], x=RIGHT-72, y=g.y2;
+  ctx.fillStyle="#141414"; ctx.fillRect(x-34,y-58,68,52);
+  ctx.strokeStyle="#ffb300"; ctx.lineWidth=2; ctx.strokeRect(x-34,y-58,68,52);
+  ctx.fillStyle="#ffb300"; ctx.font="bold 10px Consolas,monospace"; ctx.textAlign="center";
+  ctx.fillText("YOUR",x,y-42); ctx.fillText("SHARES",x,y-30);
+  ctx.font="16px serif"; ctx.fillText(frame%40<20?"🔒":"💎",x,y-14);
+}
+function draw(){
+  ctx.save();
+  if(shake>0) ctx.translate(rnd(-shake,shake)*0.4,rnd(-shake,shake)*0.4);
+  ctx.clearRect(-20,-20,W+40,H+40);
+  ctx.fillStyle="#050505"; ctx.fillRect(0,0,W,H);
+  if(state==="menu"){ drawMenu(); ctx.restore(); return; }
+  drawLadders(); drawGirders(); drawVault();
+  coins.forEach(c=>{ if(c.got) return;
+    ctx.save(); ctx.translate(c.x,c.y+Math.sin(c.t)*3); ctx.font="20px serif";
+    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("🪙",0,0); ctx.restore(); });
+  hammers.forEach(m=>{ if(m.got) return;
+    ctx.font="20px serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText("🔨",m.x,m.y+Math.sin(frame*0.1)*2); });
+  barrels.forEach(drawBarrel);
+  drawBear();
+  if(winT<=0||frame%6<3) drawHero();
+  parts.forEach(p=>{ ctx.globalAlpha=Math.min(1,p.life/25); ctx.fillStyle=p.col;
+    ctx.fillRect(p.x-1.5,p.y-1.5,3,3); ctx.globalAlpha=1; });
+  popups.forEach(p=>{ ctx.globalAlpha=Math.min(1,p.life/30); ctx.fillStyle=p.col;
+    ctx.font="bold 14px Consolas,monospace"; ctx.textAlign="center"; ctx.fillText(p.txt,p.x,p.y); ctx.globalAlpha=1; });
+  drawHUD();
+  if(state==="pause") overlayText("PAUSED","press P to resume · ESC to exit to the calculator");
+  if(state==="over") drawOver();
+  ctx.restore();
+}
+function drawHUD(){
+  ctx.textAlign="left"; ctx.fillStyle="#00c853"; ctx.font="bold 20px Consolas,monospace";
+  ctx.fillText("P/L  $"+score.toLocaleString(),16,28);
+  ctx.fillStyle="#9aa0a6"; ctx.font="12px Consolas,monospace";
+  ctx.fillText("HI $"+Math.max(hi,score).toLocaleString(),16,46);
+  ctx.textAlign="center"; ctx.fillStyle="#fff"; ctx.font="bold 15px Oswald,sans-serif";
+  ctx.fillText("FLOOR "+level,W/2,26);
+  ctx.fillStyle="#ffb300"; ctx.font="12px Consolas,monospace";
+  ctx.fillText("BONUS $"+bonus,W/2,46);
+  ctx.textAlign="right"; ctx.font="16px serif";
+  for(let i=0;i<lives;i++) ctx.fillText("🧢",W-14-i*22,26);
+  if(hammerT>0){ ctx.fillStyle="#00c853"; ctx.font="11px Consolas,monospace";
+    ctx.fillText("🔨 "+Math.ceil(hammerT/60)+"s",W-14,46); }
+}
+function overlayText(a,b){
+  ctx.fillStyle="rgba(0,0,0,.6)"; ctx.fillRect(0,0,W,H);
+  ctx.textAlign="center"; ctx.fillStyle="#fff"; ctx.font="bold 44px Oswald,sans-serif";
+  ctx.fillText(a,W/2,H/2-10);
+  ctx.fillStyle="#9aa0a6"; ctx.font="14px Consolas,monospace"; ctx.fillText(b,W/2,H/2+24);
+}
+function verdict(){
+  if(score>=30000) return ["HEALTHY · THE FLOOR IS OURS","#00c853"];
+  if(score>=15000) return ["STRUGGLING · STILL HODLING","#ffb300"];
+  if(score>=6000)  return ["CRITICAL · MARGIN IS CALLING","#e8843a"];
+  return ["DEAD ON ARRIVAL · 0/100","#FD0000"];
+}
+function drawOver(){
+  ctx.fillStyle="rgba(0,0,0,.7)"; ctx.fillRect(0,0,W,H);
+  const [v,col]=verdict(); ctx.textAlign="center";
+  ctx.fillStyle="#fff"; ctx.font="bold 44px Oswald,sans-serif"; ctx.fillText("THE BEAR WINS THIS ONE",W/2,H/2-70);
+  ctx.fillStyle=col; ctx.font="bold 20px Oswald,sans-serif"; ctx.fillText(v,W/2,H/2-32);
+  ctx.fillStyle="#00c853"; ctx.font="bold 26px Consolas,monospace"; ctx.fillText("FINAL P/L  $"+score.toLocaleString(),W/2,H/2+12);
+  ctx.fillStyle="#ffb300"; ctx.font="15px Consolas,monospace";
+  ctx.fillText(score>=hi&&score>0?"★ NEW ALL-TIME HIGH ★":"ALL-TIME HIGH  $"+hi.toLocaleString(),W/2,H/2+42);
+  ctx.fillStyle="#9aa0a6"; ctx.font="14px Consolas,monospace";
+  ctx.fillText("press ENTER to buy the dip (play again)",W/2,H/2+78);
+  ctx.fillStyle="#6b6b6b"; ctx.font="12px Consolas,monospace";
+  ctx.fillText("press ESC to exit to the calculator",W/2,H/2+102);
+}
+function drawMenu(){
+  ctx.textAlign="center";
+  ctx.fillStyle="#fff"; ctx.font="bold 52px Oswald,sans-serif"; ctx.fillText("SQUEEZE KONG",W/2,150);
+  ctx.fillStyle="#FD0000"; ctx.font="bold 15px Oswald,sans-serif"; ctx.letterSpacing="4px";
+  ctx.fillText("POWER TO THE PLAYERS",W/2,180); ctx.letterSpacing="0px";
+  ctx.font="52px serif"; ctx.fillText("🐻",W/2-90,265); ctx.fillText("🧢",W/2+90,265);
+  ctx.fillStyle="#9aa0a6"; ctx.font="13px Consolas,monospace";
+  const lines=[
+    "The Big Short Bear has your shares locked in the vault at the top.",
+    "Climb the girders. He rolls SHORT barrels down at you the whole way.",
+    "",
+    "Jump a barrel: +$100  ·  🪙 coin: +$500  ·  reach the vault: bonus + $2,000",
+    "🔨 grab the BUY BUTTON to smash barrels for 8 seconds (+$300 each)",
+    "Your BONUS bleeds down like theta while you climb — move fast.",
+  ];
+  lines.forEach((t,i)=>ctx.fillText(t,W/2,330+i*22));
+  ctx.fillStyle="#ffb300"; ctx.font="bold 18px Oswald,sans-serif";
+  if(frame%60<40) ctx.fillText("PRESS ENTER TO START",W/2,505);
+  ctx.fillStyle="#9aa0a6"; ctx.font="12px Consolas,monospace";
+  ctx.fillText("ALL-TIME HIGH  $"+hi.toLocaleString(),W/2,540);
+}
+buildLevel();
+(function loop(){ update(); draw(); requestAnimationFrame(loop); })();
+</script>
+</body>
+</html>
