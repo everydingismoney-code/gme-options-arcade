@@ -1346,10 +1346,27 @@ function parseOptDescription(s){
 }
 let underlyings={};   // ticker -> spot price
 
+// Brokers often prepend a title/banner block ("Positions\nAll Accounts\nas of ...")
+// before the real header row. Scan the first several rows and pick whichever one
+// actually looks like a header, instead of blindly trusting row 0.
+const HEADER_KEYWORDS=["symbol","strike","expiration","expiry","quantity","qty","type",
+  "description","strategy","ticker","last","bid","ask","underlying","basis","account","value"];
+function findHeaderRow(rows){
+  let bestIdx=0, bestScore=-1;
+  for(let i=0;i<Math.min(rows.length,15);i++){
+    const cells=rows[i].map(c=>c.trim().toLowerCase());
+    if(cells.length<3) continue;   // a real header has multiple columns
+    const score=cells.filter(c=>HEADER_KEYWORDS.some(k=>c===k||c.includes(k))).length;
+    if(score>bestScore){ bestScore=score; bestIdx=i; }
+  }
+  return bestScore>0?bestIdx:0;
+}
+
 function ingestCSV(text){
   const rows=parseCSV(text);
   if(rows.length<2){ $("csvStatus").textContent="Couldn't read that file."; return; }
-  const hdr=rows[0].map(h=>h.trim().toLowerCase());
+  const hdrRowIdx=findHeaderRow(rows);
+  const hdr=rows[hdrRowIdx].map(h=>h.trim().toLowerCase());
   const find=(...names)=>{ for(const n of names){ const i=hdr.findIndex(h=>h===n); if(i>=0) return i; }
     for(const n of names){ const i=hdr.findIndex(h=>h.includes(n)); if(i>=0) return i; } return -1; };
   const iSym=find("symbol"), iDesc=find("strategy","description","instrument","position"),
@@ -1364,9 +1381,9 @@ function ingestCSV(text){
         iNV=find("net vega"), iTV=find("net time value","time value"),
         iVal=find("value"), iAvg=find("$ avg cost","avg cost");
   const typeCol=hdr.findIndex(h=>h==="type");  // Fidelity "Type" = Cash/Margin, not call/put
-  const isFidelityType = typeCol>=0 && rows.slice(1,8).some(r=>/^(cash|margin)$/i.test((r[typeCol]||"").trim()));
+  const isFidelityType = typeCol>=0 && rows.slice(hdrRowIdx+1,hdrRowIdx+8).some(r=>/^(cash|margin)$/i.test((r[typeCol]||"").trim()));
   const out=[]; underlyings={};
-  for(let r=1;r<rows.length;r++){
+  for(let r=hdrRowIdx+1;r<rows.length;r++){
     const c=rows[r]; if(!c.length) continue;
     const sym=iSym>=0?(c[iSym]||"").trim():"";
     const desc=iDesc>=0?(c[iDesc]||"").trim():"";
